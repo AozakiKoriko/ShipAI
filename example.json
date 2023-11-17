@@ -1,0 +1,23 @@
+{
+    "steps": [
+      {
+        "stepNumber": 1,
+        "start": [0,0],
+        "startLoc": "Ship",
+        "dest": [0,0],
+        "destLoc": "Truck",
+        "cost": 10,
+        "status": "Offload"
+      },
+      {
+        "stepNumber": 2,
+        "start": [0,1],
+        "startLoc": "Ship",
+        "dest": [0,0],
+        "destLoc": "Buffer",
+        "cost": 20,
+        "status": "Offload"
+      }
+    ]
+  }
+  
