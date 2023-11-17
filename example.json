@@ -18,6 +18,8 @@
         "cost": 20,
         "status": "Offload"
       }
-    ]
+    ],
+    "currentSteps": 1,
+    "totalTime": 30
   }
   
