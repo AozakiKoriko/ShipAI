@@ -27,7 +27,7 @@ def fill_grid_with_cargos(cargos):
 
     return grid
 
-cargos = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ShipCase1.txt")
+cargos = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase5.txt")
 grid = fill_grid_with_cargos(cargos)
 grid.reverse()
 # print grid
