@@ -27,10 +27,12 @@ def fill_grid_with_cargos(cargos):
 
     return grid
 
+# write cargo information to grid
 cargos = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase5.txt")
 grid = fill_grid_with_cargos(cargos)
-grid.reverse()
+
 # print grid
+grid.reverse()
 for row in grid:
     print(" ".join(str(item) if item is not None else "0" for item in row))
 

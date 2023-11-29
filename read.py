@@ -6,6 +6,7 @@ class Cargo:
         self.isUsed = 0 if name == "UNUSED" else 1
         self.isNan = 1 if name == "NAN" else 0
 
+# import information from manifest
 def parse_cargo_info(file_path):
     cargos = []
     with open(file_path, 'r') as file:
@@ -17,8 +18,6 @@ def parse_cargo_info(file_path):
             name = parts[2]
             cargos.append(Cargo(position, weight, name))
     return cargos
-
-
 
 def find_cargo_by_position(cargos, position):
     for cargo in cargos:
