@@ -5,16 +5,16 @@ def format_grid_line(line, row_number):
     for col_number, value in enumerate(columns, start=1):
         if value == '0':
             name = 'UNUSED'
-            weight = '00000'
+ 
         elif value == '-1':
             name = 'NAN'
-            weight = '00000'
+
         else:
             name = value
             # Placeholder for weight, update this with logic to determine weight
-            weight = '00000' 
+            # weight = '00000' 
 
-        formatted_lines.append(f"[{row_number:02},{col_number:02}], {{{weight}}}, {name}")
+        formatted_lines.append(f"[{row_number:02},{col_number:02}], {name}")
 
     return formatted_lines
 
