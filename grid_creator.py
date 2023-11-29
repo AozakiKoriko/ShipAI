@@ -1,12 +1,5 @@
 from read import parse_cargo_info
-
-class Cargo:
-    def __init__(self, position, weight, name):
-        self.position = position
-        self.weight = weight
-        self.name = name
-        self.isUsed = 0 if name == "UNUSED" else 1
-        self.isNan = 1 if name == "NAN" else 0
+from read import Cargo
 
 def fill_grid_with_cargos(cargos):
     grid = [[None for _ in range(12)] for _ in range(8)]
