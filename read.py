@@ -3,6 +3,8 @@ class Cargo:
         self.position = position
         self.weight = weight
         self.name = name
+        self.isUsed = 0 if name == "UNUSED" else 1
+        self.isNan = 1 if name == "NAN" else 0
 
 def parse_cargo_info(file_path):
     cargos = []
@@ -10,13 +12,13 @@ def parse_cargo_info(file_path):
         for line in file:
             parts = line.strip().split(', ')
             position = tuple(map(int, parts[0][1:-1].split(',')))
-            weight = int(parts[1][1:-1])
+            position = (position[0] - 1, position[1] - 1)
+            weight = int(parts[1].strip('{}'))
             name = parts[2]
-
-            if name not in ["NAN", "UNUSED"]:
-                cargos.append(Cargo(position, weight, name))
-
+            cargos.append(Cargo(position, weight, name))
     return cargos
+
+
 
 def find_cargo_by_position(cargos, position):
     for cargo in cargos:
@@ -25,9 +27,10 @@ def find_cargo_by_position(cargos, position):
     return None
 
 # read
-cargo_list = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ShipCase1.txt")
+#cargo_list = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ShipCase1.txt")
 
 # test
+"""
 while 1:
     # input
     user_input = input("Enter a position (x,y): ")
@@ -45,3 +48,5 @@ while 1:
             print("No cargo found at the given position.")
     except ValueError:
         print("Invalid input. Please enter a position in the format 'x,y'.")
+        1,2
+"""
