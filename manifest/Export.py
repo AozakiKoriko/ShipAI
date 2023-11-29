@@ -1,16 +1,45 @@
-import json
-from model import Container  
-class JSONFileHandler:
-    def write(self, manifest, file_path):
-        formatted_data = {
-            'manifest': [container.to_dict() for container in manifest.get_containers()]
-        }
-        with open(file_path, 'w') as file:
-            json.dump(formatted_data, file, indent=4)
+def format_grid_line(line, row_number):
+    formatted_lines = []
+    columns = line.split()
+    
+    for col_number, value in enumerate(columns, start=1):
+        if value == '0':
+            name = 'UNUSED'
+            weight = '00000'
+        elif value == '-1':
+            name = 'NAN'
+            weight = '00000'
+        else:
+            name = value
+            # Placeholder for weight, update this with logic to determine weight
+            weight = '00000' 
 
-class TextFileHandler:
-    def write(self, manifest, file_path):
-        with open(file_path, 'w') as file:
-            for container in manifest.get_containers():
-                line = f"[{container.position}], {{{container.weight}}}, {container.description}\n"
-                file.write(line)
+        formatted_lines.append(f"[{row_number:02},{col_number:02}], {{{weight}}}, {name}")
+
+    return formatted_lines
+
+def export_formatted_grid(grid):
+    formatted_output = []
+    current_row_number = 1
+    for line in reversed(grid):  # Process the grid lines in reverse order
+        formatted_line = format_grid_line(line, current_row_number)
+        formatted_output.extend(formatted_line)
+        current_row_number += 1  # Increment the row number after processing each line
+    
+    return '\n'.join(formatted_output)
+
+# Example usage
+grid_data = """
+0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0
+-1 Cat Dog Pig Hen Rat 0 0 0 0 0 -1
+""".strip().split('\n')
+
+formatted_output = export_formatted_grid(grid_data)
+print(formatted_output)
+
