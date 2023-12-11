@@ -25,11 +25,9 @@ def find_cargo_by_position(cargos, position):
             return cargo
     return None
 
-# read
-#cargo_list = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ShipCase1.txt")
-
-# test
 """
+cargo_list = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase6.txt")
+
 while 1:
     # input
     user_input = input("Enter a position (x,y): ")
@@ -48,4 +46,5 @@ while 1:
     except ValueError:
         print("Invalid input. Please enter a position in the format 'x,y'.")
         1,2
+
 """
