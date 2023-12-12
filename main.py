@@ -32,6 +32,7 @@ def update_username():
     # Function to handle updating the username
     def set_new_username():
         new_username = username_entry.get()
+
         if new_username:
             username = new_username
             greeting_label.config(text=f"On duty: {username}")
@@ -391,18 +392,10 @@ def check_login(user):
     if user:  # Check if the username is not empty
         username = user  # Set the global username variable
         login_window.destroy()  # Close the login window
-        root.deiconify()  # Show the main window with greeting
-        main_window_greeting(username)
+        root.deiconify()  # Show the main window without the greeting
         save_to_log(f"{username} signs in")
     else:
         tk.messagebox.showerror("Error", "Please enter a username.")
-
-
-# Main window with greeting
-def main_window_greeting(username):
-    global root
-    greeting_label = tk.Label(root, text="Hello, " + username, font=("Arial", 18))
-    greeting_label.pack(pady=50)
 
 
 # Main window
