@@ -23,11 +23,15 @@ def fill_grid_with_cargos(cargos):
 
     return grid
 
+manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase1.txt"
 
 # write cargo information to grid
-cargos = parse_cargo_info("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase6.txt")
+cargos = parse_cargo_info( manifest_path )
 grid = fill_grid_with_cargos(cargos)
 
-
+#print grid
+#grid.reverse()
+#for row in grid:
+#    print(" ".join(str(item) if item is not None else "0" for item in row))
 
 

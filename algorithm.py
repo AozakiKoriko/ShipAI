@@ -38,7 +38,7 @@ def manhattan_distance(point_a, point_b):
 
 def get_neighbors(array, targets, blocks, onloads, current_position, des):
     neighbors = []
-    
+
     if len(targets) == 0 and len(onloads) != 0:
         selected_block = onloads[0]
         target_point = None
@@ -56,12 +56,19 @@ def get_neighbors(array, targets, blocks, onloads, current_position, des):
                 if target_point is not None:
                     break
         if target_point:
+                
+                is_new_block = any(target[1] == target_point[1] for target in targets)
+                if is_new_block:
+                    new_blocks = blocks + [target_point]
+                else:
+                    new_blocks = blocks.copy()
+
                 new_array = [row[:] for row in array]
                 new_array[target_point[0]][target_point[1]] = onloads[0]  # 更新数组中的点
                 cost = 4 + manhattan_distance(des, (x, y))
                 new_onloads = onloads[1:]  # 更新 onload_list
                 new_position = target_point
-                new_node = Node(new_array, targets, blocks, new_onloads, new_position, g=cost)
+                new_node = Node(new_array, targets, new_blocks, new_onloads, new_position, g=cost)
                 neighbors.append(new_node)
 
     if current_position == des and onloads:
@@ -82,6 +89,13 @@ def get_neighbors(array, targets, blocks, onloads, current_position, des):
                 if target_point is not None:
                     break
         if target_point:
+                
+                is_new_block = any(target[1] == target_point[1] for target in targets)
+                if is_new_block:
+                    new_blocks = blocks + [target_point]
+                else:
+                    new_blocks = blocks.copy()
+
                 new_array = [row[:] for row in array]
                 new_array[target_point[0]][target_point[1]] = onloads[0]  # 更新数组中的点
                 cost = 4 + manhattan_distance(des, (x, y))
@@ -126,6 +140,13 @@ def get_neighbors(array, targets, blocks, onloads, current_position, des):
                     break  # 找到合适的target_point后退出外层循环
 
         if target_point:
+
+            is_new_block = any(target[1] == target_point[1] for target in targets)
+            if is_new_block:
+                new_blocks = blocks + [target_point]
+            else:
+                new_blocks = blocks.copy()
+
             new_array = [row[:] for row in array]
             new_array[target_point[0]][target_point[1]] = new_array[selected_block[0]][selected_block[1]]
             new_array[selected_block[0]][selected_block[1]] = 0
