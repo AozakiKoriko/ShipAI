@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 import os
+import datetime
 
 # Get the path to the desktop directory
 desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
@@ -9,14 +10,17 @@ log_file_path = os.path.join(desktop_path, 'log.txt')
 
 
 # Function to save message to log file
-def save_to_log(message):
+def save_to_log(action):
+    timestamp = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
+    log_message = f"{timestamp} - {action}\n"
     with open(log_file_path, "a") as log_file:
-        log_file.write(message + "\n")
+        log_file.write(log_message)
 
 
 def back_to_main(current_window):
     current_window.destroy()
     root.deiconify()
+    save_to_log("Finished a Cycle.")
 
 
 username = None
@@ -32,31 +36,35 @@ def update_username():
             username = new_username
             greeting_label.config(text=f"On duty: {username}")
             popup_window.destroy()
+            save_to_log(f"{username} signs in")
 
     # Create a pop-up window for entering a new username
     popup_window = tk.Toplevel()
-    popup_window.title("Update Username")
+    popup_window.title("Hand Over")
     popup_window.geometry("300x150")
     popup_window.resizable(False, False)
 
-    username_label = tk.Label(popup_window, text="Enter new username:")
+    username_label = tk.Label(popup_window, text="Enter username:")
     username_label.pack(pady=10)
 
     username_entry = tk.Entry(popup_window)
     username_entry.pack(pady=5)
 
-    update_button = tk.Button(popup_window, text="Update", command=set_new_username)
+    update_button = tk.Button(popup_window, text="signs in", command=set_new_username)
     update_button.pack(pady=10)
 
 
 # Read load manifest
 def load_window():
+    save_to_log("Need to Load/Offload")
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     if file_path:
         try:
             with open(file_path, 'r') as file:
                 lines = file.readlines()
                 display_load(lines)
+                file_name = os.path.basename(file_path)  # Extracting only the file name
+                save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
         except FileNotFoundError:
             print("File not found")
         except Exception as e:
@@ -90,7 +98,7 @@ def display_load(lines):
     left_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
     # Button to update the username
-    update_username_button = tk.Button(left_frame, text="Update Username", command=update_username)
+    update_username_button = tk.Button(left_frame, text="Hand Over", command=update_username)
     update_username_button.pack(pady=5)
 
     # Button to go back to the main window
@@ -209,12 +217,15 @@ def display_load(lines):
 
 # Read balance manifest
 def balance_window():
+    save_to_log("Need to balance")
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     if file_path:
         try:
             with open(file_path, 'r') as file:
                 lines = file.readlines()
                 display_balance(lines)
+                file_name = os.path.basename(file_path)  # Extracting only the file name
+                save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
         except FileNotFoundError:
             print("File not found")
         except Exception as e:
@@ -239,7 +250,7 @@ def display_balance(lines):
     left_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
     # Button to update the username
-    update_username_button = tk.Button(left_frame, text="Update Username", command=update_username)
+    update_username_button = tk.Button(left_frame, text="Hand over", command=update_username)
     update_username_button.pack(pady=5)
 
     # Button to go back to the main window
@@ -359,7 +370,7 @@ def display_balance(lines):
 def login():
     global username, login_window, root
     login_window = tk.Toplevel()
-    login_window.title("Login")
+    login_window.title("Sign in")
     login_frame = tk.Frame(login_window)
     login_frame.pack(padx=100, pady=80)
 
@@ -370,7 +381,7 @@ def login():
     username_entry.pack()
 
     # Login button
-    login_button = tk.Button(login_frame, text="Login", command=lambda: check_login(username_entry.get()))
+    login_button = tk.Button(login_frame, text="Sign in", command=lambda: check_login(username_entry.get()))
     login_button.pack()
 
 
@@ -382,6 +393,7 @@ def check_login(user):
         login_window.destroy()  # Close the login window
         root.deiconify()  # Show the main window with greeting
         main_window_greeting(username)
+        save_to_log(f"{username} signs in")
     else:
         tk.messagebox.showerror("Error", "Please enter a username.")
 
