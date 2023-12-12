@@ -202,6 +202,6 @@ if path:
         array, targets, blocks, current_position, cost = step  # 提取 array, targets, blocks, current_position 和 cost
         for row in array:
             print(' '.join(map(str, row)))
-        print()  # 打印一个空行以分隔不同的步骤
+        print()  
 else:
     print("No path found.")
