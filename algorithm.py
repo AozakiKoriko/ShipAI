@@ -1,10 +1,11 @@
 import heapq
 
 class Node:
-    def __init__(self, array, targets, blocks, current_position, parent=None, g=0, h=0):
+    def __init__(self, array, targets, blocks, onloads, current_position, parent=None, g=0, h=0):
         self.array = array
         self.targets = targets
         self.blocks = blocks
+        self.onloads = onloads
         self.current_position = current_position
         self.parent = parent
         self.g = g
@@ -21,8 +22,8 @@ def heuristic(targets, des):
         total_distance += manhattan_distance(target, des)
     return total_distance
 
-def goal_reached(targets):
-    return len(targets) == 0
+def goal_reached(targets, onloads):
+    return len(targets) == 0 and len(onloads) == 0
 
 def reconstruct_path(node):
     path = []
@@ -35,9 +36,60 @@ def manhattan_distance(point_a, point_b):
     return abs(point_a[0] - point_b[0]) + abs(point_a[1] - point_b[1])
 
 
-def get_neighbors(array, targets, blocks, current_position, des):
+def get_neighbors(array, targets, blocks, onloads, current_position, des):
     neighbors = []
+    
+    if len(targets) == 0 and len(onloads) != 0:
+        selected_block = onloads[0]
+        target_point = None
+        min_distance = float('inf')
 
+        for x in range(len(array)):
+            for y in range(len(array[0])):
+                if array[x][y] == 0 and (x == 0 or array[x-1][y] != 0):
+                    distance = manhattan_distance(des, (x, y))
+                    if distance < min_distance:
+                        min_distance = distance
+                        target_point = (x,y)
+                        print("Onload cargo: ", selected_block)
+                        print("Target point: ", target_point)
+                if target_point is not None:
+                    break
+        if target_point:
+                new_array = [row[:] for row in array]
+                new_array[target_point[0]][target_point[1]] = onloads[0]  # 更新数组中的点
+                cost = 4 + manhattan_distance(des, (x, y))
+                new_onloads = onloads[1:]  # 更新 onload_list
+                new_position = target_point
+                new_node = Node(new_array, targets, blocks, new_onloads, new_position, g=cost)
+                neighbors.append(new_node)
+
+    if current_position == des and onloads:
+
+        selected_block = onloads[0]
+        target_point = None
+        min_distance = float('inf')
+
+        for x in range(len(array)):
+            for y in range(len(array[0])):
+                if array[x][y] == 0 and (x == 0 or array[x-1][y] != 0):
+                    distance = manhattan_distance(des, (x, y))
+                    if distance < min_distance:
+                        min_distance = distance
+                        target_point = (x,y)
+                        print("Onload cargo: ", selected_block)
+                        print("Target point: ", target_point)
+                if target_point is not None:
+                    break
+        if target_point:
+                new_array = [row[:] for row in array]
+                new_array[target_point[0]][target_point[1]] = onloads[0]  # 更新数组中的点
+                cost = 4 + manhattan_distance(des, (x, y))
+                new_onloads = onloads[1:]  # 更新 onload_list
+                new_position = target_point
+                new_node = Node(new_array, targets, blocks, new_onloads, new_position, g=cost)
+                neighbors.append(new_node)
+    
 
     for target in targets:
 
@@ -47,7 +99,7 @@ def get_neighbors(array, targets, blocks, current_position, des):
             new_targets = [t for t in targets if t != target]
             cost = manhattan_distance(current_position, target) + manhattan_distance(target, des)
             new_position = des  
-            new_node = Node(new_array, new_targets, blocks, new_position, g=cost)
+            new_node = Node(new_array, new_targets, blocks, onloads, new_position, g=cost)
             neighbors.append(new_node)
             break  
 
@@ -79,14 +131,14 @@ def get_neighbors(array, targets, blocks, current_position, des):
             new_array[selected_block[0]][selected_block[1]] = 0
             cost = manhattan_distance(current_position, selected_block) + manhattan_distance(selected_block, target_point)
             new_blocks = [b for b in blocks if b != selected_block]
-            new_node = Node(new_array, targets, new_blocks, target_point, g=cost)
+            new_node = Node(new_array, targets, new_blocks, onloads, target_point, g=cost)
             neighbors.append(new_node)
 
     return neighbors
 
 
-def a_star(initial_array, targets, blocks, initial_position, des):
-    start_node = Node(initial_array, targets, blocks, initial_position)
+def a_star(initial_array, targets, blocks, onloads, initial_position, des):
+    start_node = Node(initial_array, targets, blocks,onloads, initial_position)
     start_node.h = heuristic(targets, des)
     start_node.f = start_node.g + start_node.h
 
@@ -97,22 +149,22 @@ def a_star(initial_array, targets, blocks, initial_position, des):
 
     while open_set:
         current_f, current_node = heapq.heappop(open_set)
-        
+
         print("当前处理的节点:", current_node.current_position, "具有 f 值:", current_f)
         for row in current_node.array:
             print(' '.join(map(str, row)))
         print()  # 打印一个空行以分隔不同的步骤
 
-        if goal_reached(current_node.targets):
-            
+        if goal_reached(current_node.targets, current_node.onloads):
+
             return reconstruct_path(current_node)
 
         closed_set.add(current_node)
 
-        neighbors = get_neighbors(current_node.array, current_node.targets, current_node.blocks, current_node.current_position, des)
+        neighbors = get_neighbors(current_node.array, current_node.targets, current_node.blocks, current_node.onloads, current_node.current_position, des)
 
         for neighbor in neighbors:
-            
+
             if neighbor in closed_set:
                 continue
 
@@ -126,23 +178,24 @@ def a_star(initial_array, targets, blocks, initial_position, des):
 
                 if neighbor not in open_set:
                     heapq.heappush(open_set, (neighbor.f, neighbor))
-                    
+
 
     return None
 
 
 initial_array =[
-    [-1,"A", "B","E"],
-    [0, "D", "C", 0],
-    [0, "F", 0, 0],
-    [0, 0, 0, 0]
+    [-1,"A", "B","E", 0],
+    [0, "D", "C", 0, 0],
+    [0, "F", 0, 0, 0],
+    [0, 0, 0, 0, 0]
 ]
 initial_targets = [(0,1),(0,2),(0,3)]
 initial_blocks = [(1,1),(1,2),(2,1)]
 initial_position = (3,0)
+initial_onloads = ["Z","T","X","Y"]
 des = (3,0)
 
-path = a_star(initial_array, initial_targets, initial_blocks, initial_position, des)
+path = a_star(initial_array, initial_targets, initial_blocks, initial_onloads, initial_position, des)
 if path:
     print("Found a path!")
     for step in path:
@@ -152,7 +205,3 @@ if path:
         print()  # 打印一个空行以分隔不同的步骤
 else:
     print("No path found.")
-
-
-
-
