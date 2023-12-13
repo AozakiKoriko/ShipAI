@@ -113,6 +113,47 @@ def display_load(lines):
     clear_button = tk.Button(left_frame, text="Clear", command=lambda: update_content_display(""))
     clear_button.pack(pady=5)
 
+    def confirm_description():
+        description = description_entry.get().strip()  # Strip leading/trailing whitespace
+        disallowed_exact_words = ["?nan?", "?unused?", "nan"]
+
+        if description.lower() in disallowed_exact_words or not description:
+            messagebox.showerror("Description Check",
+                                 "Invalid description.")
+        else:
+            messagebox.showinfo("Description Check", "Valid description.")
+
+    def confirm_weight():
+        weight = weight_entry.get()
+        if weight.isdigit():
+            weight_value = int(weight)
+            if 1 <= weight_value <= 99999:
+                messagebox.showinfo("Weight Check", "Valid weight.")
+            else:
+                messagebox.showerror("Weight Check", "Invalid weight. Enter a positive integer between 20 and 99999.")
+        else:
+            messagebox.showerror("Weight Check", "Invalid weight. Please enter an integer.")
+
+    # Label and Entry for Description
+    description_label = tk.Label(the_load_window, text="Description:")
+    description_label.pack(pady=5)
+    description_entry = tk.Entry(the_load_window)
+    description_entry.pack(pady=5)
+
+    # Button for confirming Description
+    confirm_description_button = tk.Button(the_load_window, text="Confirm Description", command=confirm_description)
+    confirm_description_button.pack(pady=5)
+
+    # Label and Entry for Weight
+    weight_label = tk.Label(the_load_window, text="Weight:")
+    weight_label.pack(pady=5)
+    weight_entry = tk.Entry(the_load_window)
+    weight_entry.pack(pady=5)
+
+    # Button for confirming Weight
+    confirm_weight_button = tk.Button(the_load_window, text="Confirm Weight", command=confirm_weight)
+    confirm_weight_button.pack(pady=5)
+
     # 8x12 grid display
     frame = tk.Frame(main_frame)
     frame.pack()
@@ -148,7 +189,7 @@ def display_load(lines):
     red_to_green_button.pack(pady=5)
 
     # Textbox for entering messages
-    message_textbox = tk.Text(left_frame, height=3, width=30)
+    message_textbox = tk.Text(left_frame, height=3, width=40)
     message_textbox.pack()
 
     # Function to clear the message textbox
@@ -288,7 +329,7 @@ def display_balance(lines):
     symmetry_check_button.pack(pady=5)
 
     # Textbox for entering messages
-    message_textbox = tk.Text(left_frame, height=3, width=30)
+    message_textbox = tk.Text(left_frame, height=3, width=40)
     message_textbox.pack(pady=10)
 
     # Function to clear the message textbox
@@ -322,7 +363,7 @@ def display_balance(lines):
                                 state=tk.DISABLED)
             else:
                 btn = tk.Button(frame, text=label_text, borderwidth=1, relief="solid", width=8, height=2,
-                                bg="light green", command=lambda b=label_text: update_content_display(b))
+                                bg="light green", state=tk.DISABLED)
             btn.grid(row=i, column=j)
             buttons_dict[(i, j)] = btn  # Store buttons in dictionary
 
