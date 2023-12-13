@@ -73,7 +73,6 @@ def load_window():
 
 # Display load manifest
 def display_load(lines):
-    global username
     the_load_window = tk.Toplevel(root)
     the_load_window.title("Load/Offload")
     main_frame = tk.Frame(the_load_window)
@@ -118,6 +117,8 @@ def display_load(lines):
     frame = tk.Frame(main_frame)
     frame.pack()
 
+    buttons_dict = {}  # Dictionary to keep track of buttons
+
     # function to toggle cell color between light green and light blue
     def change_cell_color(btn):
         current_color = btn.cget('bg')
@@ -147,7 +148,7 @@ def display_load(lines):
     red_to_green_button.pack(pady=5)
 
     # Textbox for entering messages
-    message_textbox = tk.Text(left_frame, height=5, width=30)
+    message_textbox = tk.Text(left_frame, height=3, width=30)
     message_textbox.pack()
 
     # Function to clear the message textbox
@@ -168,7 +169,6 @@ def display_load(lines):
     submit_button = tk.Button(left_frame, text="Submit", command=submit_message)
     submit_button.pack(pady=5)
 
-    buttons_dict = {}
     for i in range(7, -1, -1):
         for j in range(12):
             data = lines[(7 - i) * 12 + j].strip().split(', ')
@@ -226,16 +226,11 @@ def balance_window():
 
 # Display balance manifest
 def display_balance(lines):
-    global username, greeting_label
     the_balance_window = tk.Toplevel(root)
     the_balance_window.title("Balance")
     main_frame = tk.Frame(the_balance_window)
     main_frame.pack(side=tk.RIGHT, padx=50, pady=50)
     root.withdraw()  # close balance window
-
-    # Greeting label with the username
-    greeting_label = tk.Label(the_balance_window, text=f"On duty: {username}", font=("Arial", 16))
-    greeting_label.pack(pady=10)
 
     # Frame for the content display area on the left
     left_frame = tk.Frame(the_balance_window)
@@ -267,40 +262,33 @@ def display_balance(lines):
     frame.pack()
 
     buttons_dict = {}  # Dictionary to keep track of buttons
-    blinking_buttons = {}  # Dictionary to track blinking buttons
 
-    def blink(button):
-        if button.winfo_exists():
-            current_color = button.cget('bg')
-            new_color = 'red' if current_color == 'light blue' else 'light blue'
-            button.config(bg=new_color)
-            blinking_buttons[button] = root.after(500, lambda b=button: blink(b))
+    def is_symmetrical(grid_data):
+        rows = len(grid_data)
+        cols = len(grid_data[0]) if rows > 0 else 0
+        mid_col = cols // 2
 
-    # Function to turn all light blue cells to red and start blinking
-    def start_blinking():
-        for button in buttons_dict.values():
-            if button.cget('bg') == 'light blue':
-                button.config(bg='red')
-                blinking_buttons[button] = root.after(500, lambda b=button: blink(b))
+        for i in range(rows):
+            for j in range(mid_col):
+                if grid_data[i][j] != grid_data[i][cols - 1 - j]:
+                    return False
+        return True
 
-    # New function to change cell color from green to red and vice versa
-    def change_cell_color(btn):
-        if btn.cget('bg') == 'light green':
-            btn.config(bg='light blue')
-        elif btn.cget('bg') == 'light blue':
-            btn.config(bg='light green')
+    def check_symmetry():
+        grid_data = [[buttons_dict[(i, j)].cget('text') for j in range(12)] for i in range(8)]
+        if not is_symmetrical(grid_data):
+            print("These cells aren't symmetrical")
+            messagebox.showwarning("Symmetry Check", "These cells aren't symmetrical")
+        else:
+            print("The grid is symmetrical")
+            messagebox.showinfo("Symmetry Check", "The grid is symmetrical")
 
-            # Stop blinking if the cell becomes light green again
-            if btn in blinking_buttons:
-                root.after_cancel(blinking_buttons[btn])
-                del blinking_buttons[btn]
-
-    # Button to turn all light blue cells to red and start blinking
-    start_blinking_button = tk.Button(left_frame, text="Start Blinking", command=start_blinking)
-    start_blinking_button.pack(pady=5)
+    # Add a button to trigger the symmetry check
+    symmetry_check_button = tk.Button(left_frame, text="Check Symmetry", command=check_symmetry)
+    symmetry_check_button.pack(pady=5)
 
     # Textbox for entering messages
-    message_textbox = tk.Text(left_frame, height=10, width=40)
+    message_textbox = tk.Text(left_frame, height=3, width=30)
     message_textbox.pack(pady=10)
 
     # Function to clear the message textbox
@@ -335,7 +323,6 @@ def display_balance(lines):
             else:
                 btn = tk.Button(frame, text=label_text, borderwidth=1, relief="solid", width=8, height=2,
                                 bg="light green", command=lambda b=label_text: update_content_display(b))
-                btn.bind('<Button-1>', lambda event, button=btn: change_cell_color(button))  # Bind left click event
             btn.grid(row=i, column=j)
             buttons_dict[(i, j)] = btn  # Store buttons in dictionary
 
