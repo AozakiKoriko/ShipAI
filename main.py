@@ -1,8 +1,8 @@
+import datetime
+import os
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
-import os
-import datetime
 
 # Get the path to the desktop directory
 desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
@@ -27,7 +27,7 @@ username = None
 
 
 def update_username():
-    global greeting_label, username
+    global username
 
     # Function to handle updating the username
     def set_new_username():
@@ -35,7 +35,6 @@ def update_username():
 
         if new_username:
             username = new_username
-            greeting_label.config(text=f"On duty: {username}")
             popup_window.destroy()
             save_to_log(f"{username} signs in")
 
@@ -74,16 +73,12 @@ def load_window():
 
 # Display load manifest
 def display_load(lines):
-    global username, greeting_label
+    global username
     the_load_window = tk.Toplevel(root)
     the_load_window.title("Load/Offload")
     main_frame = tk.Frame(the_load_window)
     main_frame.pack(side=tk.RIGHT, padx=50, pady=50)
     root.withdraw()  # close main window
-
-    # Greeting label with the username
-    greeting_label = tk.Label(the_load_window, text=f"On duty: {username}", font=("Arial", 16))
-    greeting_label.pack(pady=10)
 
     # Create a frame for the 1x1 grid trunk
     truck_grid_frame = tk.Frame(main_frame)
@@ -403,9 +398,16 @@ root = tk.Tk()
 root.title("ShipsAI")
 root.geometry("650x450")
 
-# Hide the main window initially, Show login window
-root.withdraw()
-login()
+# show main window first
+root.deiconify()
+
+# Add a new button to open the login window
+main_login_button = tk.Button(root, text="Sign in", command=login, width=9, height=1)
+main_login_button.pack(padx=30, pady=5)
+
+# Greeting label
+greeting_label = tk.Label(root, text="Welcome to ShipsAI", font=("Arial", 24))
+greeting_label.pack(pady=10)
 
 # Load/offload button
 load_button = tk.Button(root, text="Load/Offload", command=load_window, width=18, height=2)
