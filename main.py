@@ -154,6 +154,21 @@ def display_load(lines):
     confirm_weight_button = tk.Button(the_load_window, text="Confirm Weight", command=confirm_weight)
     confirm_weight_button.pack(pady=5)
 
+    # disable copy and paste
+    def disable_event(event):
+        return "break"
+
+    description_entry.bind("<Control-c>", disable_event)
+    description_entry.bind("<Control-x>", disable_event)
+    description_entry.bind("<Control-v>", disable_event)
+
+    weight_entry.bind("<Control-c>", disable_event)
+    weight_entry.bind("<Control-x>", disable_event)
+    weight_entry.bind("<Control-v>", disable_event)
+
+    description_entry.bind("<Button-3>", disable_event)
+    weight_entry.bind("<Button-3>", disable_event)
+
     # 8x12 grid display
     frame = tk.Frame(main_frame)
     frame.pack()
