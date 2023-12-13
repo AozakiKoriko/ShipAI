@@ -118,41 +118,36 @@ def display_load(lines):
     frame = tk.Frame(main_frame)
     frame.pack()
 
-    buttons_dict = {}  # Dictionary to keep track of buttons
-    blinking_buttons = {}  # Dictionary to track blinking buttons
-
-    def blink(button):
-        if button.winfo_exists():
-            current_color = button.cget('bg')
-            new_color = 'red' if current_color == 'light blue' else 'light blue'
-            button.config(bg=new_color)
-            blinking_buttons[button] = root.after(500, lambda b=button: blink(b))
-
-    # Function to turn all light blue cells to red and start blinking
-    def start_blinking():
-        for button in buttons_dict.values():
-            if button.cget('bg') == 'light blue':
-                button.config(bg='red')
-                blinking_buttons[button] = root.after(500, lambda b=button: blink(b))
-
-    # New function to change cell color from green to red and vice versa
+    # function to toggle cell color between light green and light blue
     def change_cell_color(btn):
-        if btn.cget('bg') == 'light green':
+        current_color = btn.cget('bg')
+        if current_color == 'light green':
             btn.config(bg='light blue')
-        elif btn.cget('bg') == 'light blue':
+        elif current_color == 'light blue':
             btn.config(bg='light green')
 
-            # Stop blinking if the cell becomes light green again
-            if btn in blinking_buttons:
-                root.after_cancel(blinking_buttons[btn])
-                del blinking_buttons[btn]
+    # Function to turn all light blue cells to red
+    def turn_blue_to_red():
+        for btn in buttons_dict.values():
+            if btn.cget('bg') == 'light blue':
+                btn.config(bg='red')
 
-    # Button to turn all light blue cells to red and start blinking
-    start_blinking_button = tk.Button(left_frame, text="Start Blinking", command=start_blinking)
-    start_blinking_button.pack(pady=5)
+    # Function to reset all red cells to green
+    def reset_red_to_green():
+        for btn in buttons_dict.values():
+            if btn.cget('bg') == 'red':
+                btn.config(bg='light green')
+
+    # Button to turn all light blue cells to red
+    blue_to_red_button = tk.Button(left_frame, text="Blue to Red", command=turn_blue_to_red)
+    blue_to_red_button.pack(pady=5)
+
+    # Button to reset all red cells to green
+    red_to_green_button = tk.Button(left_frame, text="Reset Red to Green", command=reset_red_to_green)
+    red_to_green_button.pack(pady=5)
 
     # Textbox for entering messages
-    message_textbox = tk.Text(left_frame, height=10, width=40)
+    message_textbox = tk.Text(left_frame, height=5, width=30)
     message_textbox.pack()
 
     # Function to clear the message textbox
@@ -173,6 +168,7 @@ def display_load(lines):
     submit_button = tk.Button(left_frame, text="Submit", command=submit_message)
     submit_button.pack(pady=5)
 
+    buttons_dict = {}
     for i in range(7, -1, -1):
         for j in range(12):
             data = lines[(7 - i) * 12 + j].strip().split(', ')
