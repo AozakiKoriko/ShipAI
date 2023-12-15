@@ -1,46 +1,50 @@
-from algorithm import a_star
+from a_star import a_star
 from manifest_import import parse_cargo_info
 from grid_creator import fill_grid_with_cargos
-from algorithm import reconstruct_path
+from neighbors import Node
+from neighbors import get_neighbors
+from neighbors import goal_reached
 
+def find_block_list(array, target_list):
+    target_ys = set(y for _, y in target_list)
+    block_list = []
+    for i in range(len(array)):
+        if i != 8:
+            for j in range(len(array[i])):
+                if j in target_ys and array[i][j] != 0 and (i, j) not in target_list:
+                    block_list.append((i, j))
+    return block_list
 
-manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase1.txt"
+manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase2.txt"
 
 # write cargo information to grid
 cargos = parse_cargo_info( manifest_path )
 grid = fill_grid_with_cargos(cargos)
-initial_array = grid
+initial_ship = grid
 
 #user input targets
-initial_targets = [(0,1),(0,2),(0,3)]
+initial_target_list = [(0,3)]
 
-#find initial blocks
-target_ys = set(y for _, y in initial_targets)
-initial_blocks = []
-for i in range(len(grid)):
-    if i != 8:
-        for j in range(len(grid[i])):
-            if j in target_ys and grid[i][j] != 0 and (i, j) not in initial_targets :
-                initial_blocks.append((i, j))
+#get block list
+initial_block_list = find_block_list(initial_ship, initial_target_list)
 
-#set initial position
-initial_position = (8,0)
+#user input onload cargos
+initial_onload_list = ["ONLOAD"]
 
-#user input onloads
-initial_onloads = []
+#initial arm location, should not change
+initial_arm_loc = (8,0)
 
-#set exit
-des = (8,0)
+initial_cost = 0
 
-#use a_star algorithm
-path = a_star(initial_array, initial_targets, initial_blocks, initial_onloads, initial_position, des)
-if path:
-    print("Found a path!")
-    for step in path:
-        array, cost = step  # 提取 array, targets, blocks, current_position 和 cost
-        for row in array:
-            print(' '.join(map(str, row)))
-            print("Cost:", cost)
-        print()  
-else:
-    print("No path found.")
+start_node = Node(initial_ship, initial_target_list, initial_block_list, initial_onload_list, initial_arm_loc, initial_cost)
+
+path = a_star(start_node, goal_reached, get_neighbors)
+
+for node in path:
+    
+
+    for row in reversed(node.ship):
+        print(" ".join(str(item) for item in row))
+    print("Arm:", node.arm_loc)
+    print("Cost:", node.cost)
+    print("-" * 20)  

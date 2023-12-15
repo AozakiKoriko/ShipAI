@@ -21,13 +21,18 @@ def man_dis(loc_1, loc_2):
     return abs(loc_1[0] - loc_2[0]) + abs(loc_1[1] - loc_2[1])
 
 def point_dis(loc_1, loc_2, array):
-    max_height = -1
-    for x in range(len(array)):
-        for y in range(loc_1[1], loc_2[1]):
-            if array[x][y] != 0:
-                max_height = max(max_height, x)
-    height_dif = max_height - max(loc_1[0],loc_2[0])
-    distance = 2*(1 + height_dif) + man_dis(loc_1, loc_2)
+    if abs(loc_1[1] - loc_2[1]) < 2:
+        distance = man_dis(loc_1, loc_2)
+    else:
+        max_height = -1
+        y_start = min(loc_1[1], loc_2[1])
+        y_end = max(loc_1[1], loc_2[1]) + 1
+        for x in range(len(array)):
+            for y in range(y_start, y_end):
+                if array[x][y] != 0:
+                    max_height = max(max_height, x)
+        height_dif = max_height - max(loc_1[0],loc_2[0])
+        distance = 2*(1 + height_dif) + man_dis(loc_1, loc_2)
     return distance
 
 def heuristic(target_list, block_list, exit):
@@ -177,6 +182,5 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
                 neighbors.append(new_node)
     
     return neighbors
-        
         
         
