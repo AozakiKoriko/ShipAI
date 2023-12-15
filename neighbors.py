@@ -1,12 +1,14 @@
 import heapq
 
 class Node:
-    def __init__(self, ship, target_list, block_list, onload_list, arm_loc, cost, parent = None, g=0, h=0):
+    def __init__(self, ship, target_list, block_list, onload_list, arm_loc, sel_loc, mov_loc, cost, parent = None, g=0, h=0):
         self.ship = ship
         self.target_list = target_list
         self.block_list = block_list
         self.onload_list = onload_list
         self.arm_loc = arm_loc
+        self.sel_loc = sel_loc
+        self.mov_loc = mov_loc
         self.cost = cost
         self.parent = parent
         self.g = g
@@ -108,7 +110,7 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
 
         new_h = heuristic(target_list, block_list, exit)
         
-        new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, cost, current_node, cost, new_h)
+        new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, "truck", mov_loc, cost, current_node, cost, new_h)
         neighbors.append(new_node)
     
     
@@ -130,7 +132,7 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
 
             new_h = heuristic(target_list, block_list, exit)
         
-            new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, cost, current_node, cost, new_h)
+            new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, "truck", mov_loc, cost, current_node, cost, new_h)
             neighbors.append(new_node)
         
 
@@ -149,7 +151,7 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
 
                 new_h = heuristic(new_target_list, block_list, exit)
 
-                new_node = Node(new_ship, new_target_list, block_list, onload_list, new_arm_loc, cost, current_node, cost, new_h)
+                new_node = Node(new_ship, new_target_list, block_list, onload_list, new_arm_loc, sel_loc, "truck", cost, current_node, cost, new_h)
                 neighbors.append(new_node)
         
             #Situation 3: if haven't cargos can directly offload
@@ -178,7 +180,7 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
 
                 new_h = heuristic(target_list,new_block_list,exit)
                 
-                new_node = Node(new_ship, target_list, new_block_list, onload_list, new_arm_loc, cost, current_node, cost, new_h)
+                new_node = Node(new_ship, target_list, new_block_list, onload_list, new_arm_loc, sel_loc, mov_loc, cost, current_node, cost, new_h)
                 neighbors.append(new_node)
     
     return neighbors
