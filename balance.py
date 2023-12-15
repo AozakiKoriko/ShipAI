@@ -40,17 +40,18 @@ class Balancing:
         height = len(container_array)
         self.start_array = container_array
         start_point = [height, 0]
-        self.startNode = self.Node(start_point, 0, container_array, [], "place")
+        self.startNode = self.Node(start_point, 0, container_array, [], "place", 0)
         self.open_list = [self.startNode]
         self.closed_list = []
 
     class Node:
-        def __init__(self, prev_slot, gn, slot_matrix, path, state: str):
+        def __init__(self, prev_slot, gn, slot_matrix, path, state: str, cost: int):
             self.curr_slot = prev_slot
             self.gn = gn
             self.slot_matrix = slot_matrix
             self.path = path
             self.state = state
+            self.move_cost = cost
             self.hn = self.set_hn()
             self.fn = self.gn + self.hn
             self.intmatrix = int_type_matrix(slot_matrix)
@@ -184,8 +185,9 @@ class Balancing:
                 top_slot = cur_node.top_item(cur_node.slot_matrix, column)
                 if top_slot and top_slot != cur_node.curr_slot:
                     new_gn = cur_node.calc_branch_gn(top_slot)
+                    move_cost = new_gn - cur_node.gn
                     new_path = cur_node.path #+ "From " + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
-                    temp_node = self.Node(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state)
+                    temp_node = self.Node(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state, move_cost)
                     self.open_list.append(temp_node)
                     self.open_list.sort(key=lambda x: x.fn)
                 else:
@@ -200,16 +202,17 @@ class Balancing:
 
                 if top_slot and top_slot != cur_node.curr_slot:
                     new_gn = cur_node.calc_branch_gn(top_slot)
+                    move_cost = cur_node.move_cost + new_gn - cur_node.gn
                     from_slot = [[cur_node.curr_slot[0] + 1, cur_node.curr_slot[1] + 1], "Ship"]
                     to_slot = [[top_slot[0]+1, top_slot[1]+1], "Ship"]
                     new_path = copy.copy(cur_node.path)
-                    new_path.append([from_slot, to_slot])
+                    new_path.append([from_slot, to_slot, move_cost])
                     #new_path = cur_node.path + "Move container at [" + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
                     empty_container = new_matrix[top_slot[0]][top_slot[1]]
                     new_matrix[top_slot[0]][top_slot[1]] = saved_container
                     new_matrix[cur_node.curr_slot[0]][cur_node.curr_slot[1]] = empty_container
                     #checker = int_type_matrix(new_matrix)
-                    temp_node = self.Node(top_slot, new_gn, new_matrix, new_path, temp_state)
+                    temp_node = self.Node(top_slot, new_gn, new_matrix, new_path, temp_state, 0)
                     if any(are_arrays_same(node.slot_matrix, new_matrix) for node in self.closed_list):
                         continue
                     else:
@@ -269,7 +272,7 @@ class No_Branch_Hard_Blance:
         buffer = [[Container("UNUSED", 0) for _ in range(self.buffer_size[1])] for _ in range(self.buffer_size[0])]
         start_point = [height, 0]
         last_array = self.get_hard_balancing_result()
-        self.startNode = self.Node2(start_point, 0, start_array, [], "place", last_array)
+        self.startNode = self.Node2(start_point, 0, start_array, [], "place", last_array, 0)
         self.open_list = [self.startNode]
         self.closed_list = []
 
@@ -318,13 +321,14 @@ class No_Branch_Hard_Blance:
         return new_matrix
 
     class Node2:
-        def __init__(self, prev_slot, gn, slot_matrix, path, state: str, result_array):
+        def __init__(self, prev_slot, gn, slot_matrix, path, state: str, result_array, move_cost: int):
             self.curr_slot = prev_slot
             self.gn = gn
             self.slot_matrix = slot_matrix
             self.result_array = result_array
             self.path = path
             self.state = state
+            self.move_cost = move_cost
             self.height = len(slot_matrix)
             self.hn = self.set_hn()
             self.fn = self.gn + self.hn
@@ -469,8 +473,9 @@ class No_Branch_Hard_Blance:
                 # Check if there exist item for that column, and check if it is the previously moved slot
                 if top_slot and top_slot != cur_node.curr_slot and not cur_node.avoid_choosing_slot(top_slot):
                     new_gn = cur_node.local_branch_gn("slot", cur_node.curr_slot, top_slot)
+                    move_cost = new_gn - cur_node.gn
                     new_path = cur_node.path #+ "From " + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
-                    temp_node = self.Node2(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state, last_matrix)
+                    temp_node = self.Node2(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state, last_matrix, move_cost)
                     self.open_list.append(temp_node)
                     self.open_list.sort(key=lambda x: x.fn)
                 else:
@@ -489,13 +494,14 @@ class No_Branch_Hard_Blance:
                 if top_slot and top_slot != cur_node.curr_slot:
                     # Calculate moving cost for different
                     new_gn = cur_node.local_branch_gn("slot", cur_node.curr_slot, top_slot)
+                    move_cost = cur_node.move_cost + new_gn - cur_node.gn
                     start_loc = "Ship"
                     from_slot = [[cur_node.curr_slot[0] + 1, cur_node.curr_slot[1] + 1], start_loc]
                     to_slot = [[top_slot[0]+1, top_slot[1]+1], "Ship"]
                     new_path = copy.copy(cur_node.path)
-                    new_path.append([from_slot, to_slot])
+                    new_path.append([from_slot, to_slot, move_cost])
                     new_slot_matrix[top_slot[0]][top_slot[1]] = saved_container
-                    temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array)
+                    temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array, 0)
                     if any(are_arrays_same(node2.slot_matrix, new_slot_matrix) for node2 in self.closed_list):
                         continue
                     else:
@@ -525,7 +531,7 @@ class Hard_Blance:
         buffer = [[Container("UNUSED", 0) for _ in range(self.buffer_size[1])] for _ in range(self.buffer_size[0])]
         start_point = [height, 0]
         last_array = self.get_hard_balancing_result()
-        self.startNode = self.Node2(start_point, 0, start_array, [], "place", last_array, "slot", buffer)
+        self.startNode = self.Node2(start_point, 0, start_array, [], "place", last_array, "slot", buffer, 0)
         self.open_list = [self.startNode]
         self.closed_list = []
 
@@ -574,13 +580,14 @@ class Hard_Blance:
         return new_matrix
 
     class Node2:
-        def __init__(self, prev_slot, gn, slot_matrix, path, state: str, result_array, position, buffer_matrix):
+        def __init__(self, prev_slot, gn, slot_matrix, path, state: str, result_array, position, buffer_matrix, cost:int):
             self.curr_slot = prev_slot
             self.gn = gn
             self.slot_matrix = slot_matrix
             self.buffer_matrix = buffer_matrix
             self.result_array = result_array
             self.position = position
+            self.move_cost = cost
             self.path = path
             self.state = state
             self.height = len(slot_matrix)
@@ -709,8 +716,9 @@ class Hard_Blance:
                         new_gn = cur_node.local_branch_gn("slot", cur_node.curr_slot, top_slot)
                     elif cur_node.position == "buffer":
                         new_gn = cur_node.switch_branch_gn(cur_node.curr_slot, top_slot)
+                    move_cost = new_gn - cur_node.gn
                     new_path = cur_node.path #+ "From " + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
-                    temp_node = self.Node2(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state, last_matrix, "slot", cur_node.buffer_matrix )
+                    temp_node = self.Node2(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state, last_matrix, "slot", cur_node.buffer_matrix, move_cost)
                     self.open_list.append(temp_node)
                     self.open_list.sort(key=lambda x: x.fn)
                 else:
@@ -724,8 +732,9 @@ class Hard_Blance:
                         new_gn = cur_node.local_branch_gn("buffer", cur_node.curr_slot, top_slot)
                     elif cur_node.position == "slot":
                         new_gn = cur_node.switch_branch_gn(top_slot, cur_node.curr_slot)
+                    move_cost = new_gn - cur_node.gn
                     new_path = cur_node.path #+ "From " + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
-                    temp_node = self.Node2(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state, last_matrix, "buffer", cur_node.buffer_matrix)
+                    temp_node = self.Node2(top_slot, new_gn, cur_node.slot_matrix, new_path, temp_state, last_matrix, "buffer", cur_node.buffer_matrix, move_cost)
                     self.open_list.append(temp_node)
                     self.open_list.sort(key=lambda x: x.fn)
                 else:
@@ -754,15 +763,16 @@ class Hard_Blance:
                     elif cur_node.position == "buffer":
                         new_gn = cur_node.switch_branch_gn(cur_node.curr_slot, top_slot)
                         start_loc = "Buffer"
+                    move_cost = cur_node.move_cost + new_gn - cur_node.gn
                     from_slot = [[cur_node.curr_slot[0] + 1, cur_node.curr_slot[1] + 1], start_loc]
                     to_slot = [[top_slot[0]+1, top_slot[1]+1], "Ship"]
                     new_path = copy.copy(cur_node.path)
-                    new_path.append([from_slot, to_slot])
+                    new_path.append([from_slot, to_slot, move_cost])
                     # new_path = cur_node.path + "Move container at [" + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
                     new_slot_matrix[top_slot[0]][top_slot[1]] = saved_container
                     #checker1 = int_type_matrix(new_slot_matrix)
                     #checker2 = int_type_matrix(new_buffer_matrix)
-                    temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array, "slot", new_buffer_matrix)
+                    temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array, "slot", new_buffer_matrix, 0)
                     if any(are_arrays_same(node2.slot_matrix, new_slot_matrix) and
                            are_arrays_same(node2.buffer_matrix, new_buffer_matrix) for node2 in
                            self.closed_list):
@@ -796,16 +806,16 @@ class Hard_Blance:
                     elif cur_node.position == "buffer":
                         new_gn = cur_node.local_branch_gn("buffer", cur_node.curr_slot, top_slot)
                         start_location = "Buffer"
-
+                    move_cost = cur_node.move_cost + new_gn - cur_node.gn
                     from_slot = [[cur_node.curr_slot[0] + 1, cur_node.curr_slot[1] + 1], cur_node.position]
                     to_slot = [[top_slot[0] + 1, top_slot[1] + 1], "Buffer"]
                     new_path = copy.copy(cur_node.path)
-                    new_path.append([from_slot, to_slot])
+                    new_path.append([from_slot, to_slot, move_cost])
                     # new_path = cur_node.path + "Move container at [" + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
                     new_buffer_matrix[top_slot[0]][top_slot[1]] = saved_container
                     # checker1 = int_type_matrix(new_slot_matrix)
                     # checker2 = int_type_matrix(new_buffer_matrix)
-                    temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array, "buffer", new_buffer_matrix)
+                    temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array, "buffer", new_buffer_matrix, 0)
                     if any(are_arrays_same(node2.slot_matrix, new_slot_matrix) and
                            are_arrays_same(node2.buffer_matrix, new_buffer_matrix)for node2 in self.closed_list):
                         continue
@@ -903,7 +913,8 @@ def run(doc_path):
                 "start": [str(step[0][0][0]), str(step[0][0][1])],
                 "startLoc": step[0][1],
                 "dest": [str(step[1][0][0]), str(step[1][0][1])],
-                "destLoc": step[1][1]
+                "destLoc": step[1][1],
+                "time": step[2]
             }
             steps_json.append(step_json)
 
