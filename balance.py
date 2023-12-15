@@ -893,31 +893,35 @@ def run(doc_path):
     container_matrix = generate_container_matrix(file_path)
     b = Balancing(container_matrix)
     N = b.find_optimal_node()
+    if N:
+        steps_data = N.path
+        steps_json = []
 
-    steps_data = N.path
-    steps_json = []
+        for index, step in enumerate(steps_data):
+            step_json = {
+                "stepNumber": index + 1,
+                "start": [str(step[0][0][0]), str(step[0][0][1])],
+                "startLoc": step[0][1],
+                "dest": [str(step[1][0][0]), str(step[1][0][1])],
+                "destLoc": step[1][1]
+            }
+            steps_json.append(step_json)
 
-    for index, step in enumerate(steps_data):
-        step_json = {
-            "stepNumber": index + 1,
-            "start": [str(step[0][0][0]), str(step[0][0][1])],
-            "startLoc": step[0][1],
-            "dest": [str(step[1][0][0]), str(step[1][0][1])],
-            "destLoc": step[1][1]
+        final_json_structure = {
+            "steps": steps_json,
+            "currentSteps": 1,
+            "totalTime": N.get_gn()
         }
-        steps_json.append(step_json)
 
-    final_json_structure = {
-        "steps": steps_json,
-        "currentSteps": 1,
-        "totalTime": N.get_gn()
-    }
+        json_output = json.dumps(final_json_structure, indent=4)
+        with open('output.json', 'w') as file:
+            file.write(json_output)
 
-    json_output = json.dumps(final_json_structure, indent=4)
-    with open('output.json', 'w') as file:
-        file.write(json_output)
+        new_file_path = file_path[:-4] + "_Updated" + ".txt"
+        generate_manifest(new_file_path, N.slot_matrix)
 
-    new_file_path = file_path[:-4] + "_Updated" + ".txt"
-    generate_manifest(new_file_path, N.slot_matrix)
+        return True
+    else:
+        return False
 
 # Press the green button in the gutter to run the script.
