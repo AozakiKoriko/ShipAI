@@ -44,18 +44,25 @@ def reconstruct_path(node):
 
 
 initial_ship = [
-    [-1,"A", "B","E", 0],
-    [0, "D", "C", 0, 0],
-    [0, "F", 0, 0, 0],
-    [0, 0, 0, 0, 0]
-]
+    [0, "A", "B", "C", 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, "D", "E", 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, "F", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
 initial_target_list = [(0,2),(0,3)]
 initial_block_list = [(1,2)]
 initial_onload_list = ["X"]
 initial_arm_loc = (8,0)
+initial_cost = 0
 
     # 创建起始节点
-start_node = Node(initial_ship, initial_target_list, initial_block_list, initial_onload_list, initial_arm_loc)
+start_node = Node(initial_ship, initial_target_list, initial_block_list, initial_onload_list, initial_arm_loc, initial_cost)
 
 path = a_star(start_node, goal_reached, get_neighbors)
 
@@ -64,5 +71,5 @@ for node in path:
     # 打印 ship 二维数组
     for row in reversed(node.ship):
         print(" ".join(str(item) for item in row))
-    print("Cost:", node.g)
+    print("Cost:", node.cost)
     print("-" * 20)  # 添加分隔符以区分不同节点的输出

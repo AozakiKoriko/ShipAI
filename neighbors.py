@@ -1,16 +1,18 @@
 import heapq
 
 class Node:
-    def __init__(self, ship, target_list, block_list, onload_list, arm_loc, parent = None, g=0, h=0):
+    def __init__(self, ship, target_list, block_list, onload_list, arm_loc, cost, parent = None, g=0, h=0):
         self.ship = ship
         self.target_list = target_list
         self.block_list = block_list
         self.onload_list = onload_list
         self.arm_loc = arm_loc
+        self.cost = cost
         self.parent = parent
         self.g = g
         self.h = h
         self.f = g + h
+        
 
     def __lt__(self, other):
         return self.f < other.F
@@ -90,17 +92,18 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
         min_distance = 9999
         for x in range(len(ship)):
             for y in range(len(ship[0])):
-                if ship[x][y] == 0 and (x == 0 or ship[x-1][y] != 0): 
-                    distance = man_dis(exit, (x,y))
-                    if distance < min_distance:
-                        min_distance = distance
-                        mov_loc = (x,y)
+                if 0 <= x < len(ship) and 0 <= y < len(ship[0]):
+                    if ship[x][y] == 0 and (x == 0 or ship[x-1][y] != 0): 
+                        distance = man_dis(exit, (x,y))
+                        if distance < min_distance:
+                            min_distance = distance
+                            mov_loc = (x,y)
         
         new_ship, new_onload_list, new_arm_loc, cost = onload(ship, onload_list, arm_loc, mov_loc, exit)
 
         new_h = heuristic(target_list, block_list, exit)
         
-        new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, current_node, cost, new_h)
+        new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, cost, current_node, cost, new_h)
         neighbors.append(new_node)
     
     
@@ -112,16 +115,17 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
             min_distance = 9999
             for x in range(len(ship)):
                 for y in range(len(ship[0])):
-                    if ship[x][y] == 0 and (x == 0 or ship[x-1][y] != 0):
-                        distance = man_dis(exit, (x,y))
-                        if distance < min_distance:
-                            min_distance = distance
-                            mov_loc = (x,y)
+                    if 0 <= x < len(ship) and 0 <= y < len(ship[0]):
+                        if ship[x][y] == 0 and (x == 0 or ship[x-1][y] != 0):
+                            distance = man_dis(exit, (x,y))
+                            if distance < min_distance:
+                                min_distance = distance
+                                mov_loc = (x,y)
             new_ship, new_onload_list, new_arm_loc, cost = onload(ship, onload_list, arm_loc, mov_loc, exit)
 
             new_h = heuristic(target_list, block_list, exit)
         
-            new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, current_node, cost, new_h)
+            new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, cost, current_node, cost, new_h)
             neighbors.append(new_node)
         
 
@@ -140,7 +144,7 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
 
                 new_h = heuristic(new_target_list, block_list, exit)
 
-                new_node = Node(new_ship, new_target_list, block_list, onload_list, new_arm_loc, current_node, cost, new_h)
+                new_node = Node(new_ship, new_target_list, block_list, onload_list, new_arm_loc, cost, current_node, cost, new_h)
                 neighbors.append(new_node)
         
             #Situation 3: if haven't cargos can directly offload
@@ -158,17 +162,18 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
                 min_distance = 9999
                 for x in range(len(ship)):
                     for y in range(len(ship[0])):
-                        if ship[x][y] == 0 and y != sel_loc[1] and (x == 0 or ship[x-1][y] != 0):
-                            distance = point_dis(sel_loc, (x,y), ship)
-                            if distance < min_distance:
-                                min_distance = distance
-                                mov_loc = (x,y)
+                        if 0 <= x < len(ship) and 0 <= y < len(ship[0]):
+                            if ship[x][y] == 0 and y != sel_loc[1] and (x == 0 or ship[x-1][y] != 0):
+                                distance = point_dis(sel_loc, (x,y), ship)
+                                if distance < min_distance:
+                                    min_distance = distance
+                                    mov_loc = (x,y)
 
                 new_ship, new_block_list, new_arm_loc, cost = move_block(ship, block_list, arm_loc, sel_loc, mov_loc, exit)
 
                 new_h = heuristic(target_list,new_block_list,exit)
                 
-                new_node = Node(new_ship, target_list, new_block_list, onload_list, new_arm_loc, current_node, cost, new_h)
+                new_node = Node(new_ship, target_list, new_block_list, onload_list, new_arm_loc, cost, current_node, cost, new_h)
                 neighbors.append(new_node)
     
     return neighbors
