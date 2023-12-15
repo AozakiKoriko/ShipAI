@@ -23,11 +23,7 @@ def fill_grid_with_cargos(cargos):
 
     return grid
 
-manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase1.txt"
 
-# write cargo information to grid
-cargos = parse_cargo_info( manifest_path )
-grid = fill_grid_with_cargos(cargos)
 
 #print grid
 #grid.reverse()
