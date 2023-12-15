@@ -3,6 +3,54 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+import json
+
+username = None
+json_data = None
+current_step = 1
+step_info_label = None
+step_details_label = None
+end_display_button = None
+
+
+# Function to read and parse JSON data
+def read_json_data():
+    json_file_path = "D:/pycharm/PYfiles/output.json"
+    try:
+        with open(json_file_path, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        print("JSON file not found")
+        return None
+    except json.JSONDecodeError:
+        print("Error decoding JSON")
+        return None
+    except Exception as e:
+        print("An error occurred:", e)
+        return None
+
+
+# Function to update the display for the next step
+def update_step_display():
+    global current_step, step_info_label, step_details_label
+    # Ensure that json_data is not None before proceeding
+    if json_data is None or step_info_label is None or step_details_label is None:
+        print("Required data or UI elements are not available")
+        return
+
+    total_steps = len(json_data["steps"])
+    if current_step < total_steps:
+        current_step += 1
+    # else:
+    #     current_step = 1  # Loop back to the first step
+
+    step_data = json_data["steps"][current_step - 1]
+    start_coords = tuple(map(int, step_data["start"]))
+    dest_coords = tuple(map(int, step_data["dest"]))
+
+    step_info_label.config(text=f"Step {current_step} of {total_steps}")
+    step_details_label.config(text=f"Start: {start_coords} -> Dest: {dest_coords}")
+
 
 # Get the path to the desktop directory
 desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
@@ -21,9 +69,6 @@ def back_to_main(current_window):
     current_window.destroy()
     root.deiconify()
     save_to_log("Finished a Cycle.")
-
-
-username = None
 
 
 def update_username():
@@ -113,26 +158,28 @@ def display_load(lines):
     clear_button = tk.Button(left_frame, text="Clear", command=lambda: update_content_display(""))
     clear_button.pack(pady=5)
 
-    def confirm_description():
-        description = description_entry.get().strip()  # Strip leading/trailing whitespace
-        disallowed_exact_words = ["?nan?", "?unused?", "nan"]
+    def confirm_description_and_weight():
+        description = description_entry.get().strip()  # Keep the original case
+        disallowed_exact_words = ["NAN", "UNUSED"]
 
-        if description.lower() in disallowed_exact_words or not description:
-            messagebox.showerror("Description Check",
-                                 "Invalid description.")
-        else:
-            messagebox.showinfo("Description Check", "Valid description.")
+        if description in disallowed_exact_words or not description:
+            messagebox.showerror("Validation Check", "Invalid description.")
+            return  # Stop further validation if the description is invalid
 
-    def confirm_weight():
         weight = weight_entry.get()
         if weight.isdigit():
             weight_value = int(weight)
-            if 1 <= weight_value <= 99999:
-                messagebox.showinfo("Weight Check", "Valid weight.")
+            if 1 <= weight_value <= 999999:
+                # Both description and weight are valid
+                messagebox.showinfo("Validation Check", "Valid description and weight.")
+
+                # Log the valid description and weight
+                log_message = f"Description: {description}, Weight: {weight} has been added to the ship"
+                save_to_log(log_message)
             else:
-                messagebox.showerror("Weight Check", "Invalid weight. Enter a positive integer between 20 and 99999.")
+                messagebox.showerror("Validation Check", "Invalid weight.")
         else:
-            messagebox.showerror("Weight Check", "Invalid weight. Please enter an integer.")
+            messagebox.showerror("Validation Check", "Invalid weight. Please enter an integer.")
 
     # Label and Entry for Description
     description_label = tk.Label(the_load_window, text="Description:")
@@ -140,19 +187,15 @@ def display_load(lines):
     description_entry = tk.Entry(the_load_window)
     description_entry.pack(pady=5)
 
-    # Button for confirming Description
-    confirm_description_button = tk.Button(the_load_window, text="Confirm Description", command=confirm_description)
-    confirm_description_button.pack(pady=5)
-
     # Label and Entry for Weight
     weight_label = tk.Label(the_load_window, text="Weight:")
     weight_label.pack(pady=5)
     weight_entry = tk.Entry(the_load_window)
     weight_entry.pack(pady=5)
 
-    # Button for confirming Weight
-    confirm_weight_button = tk.Button(the_load_window, text="Confirm Weight", command=confirm_weight)
-    confirm_weight_button.pack(pady=5)
+    confirm_button = tk.Button(the_load_window, text="Add",
+                               command=confirm_description_and_weight)
+    confirm_button.pack(pady=5)
 
     # disable copy and paste
     def disable_event(event):
@@ -168,10 +211,6 @@ def display_load(lines):
 
     description_entry.bind("<Button-3>", disable_event)
     weight_entry.bind("<Button-3>", disable_event)
-
-    # 8x12 grid display
-    frame = tk.Frame(main_frame)
-    frame.pack()
 
     buttons_dict = {}  # Dictionary to keep track of buttons
 
@@ -204,7 +243,7 @@ def display_load(lines):
     red_to_green_button.pack(pady=5)
 
     # Textbox for entering messages
-    message_textbox = tk.Text(left_frame, height=3, width=40)
+    message_textbox = tk.Text(left_frame, height=4, width=40)
     message_textbox.pack()
 
     # Function to clear the message textbox
@@ -225,10 +264,23 @@ def display_load(lines):
     submit_button = tk.Button(left_frame, text="Submit", command=submit_message)
     submit_button.pack(pady=5)
 
-    for i in range(7, -1, -1):
-        for j in range(12):
-            data = lines[(7 - i) * 12 + j].strip().split(', ')
-            label_text = data[2]
+    # 8x12 grid display
+    frame = tk.Frame(main_frame)
+    frame.pack()
+
+    grid_data = {}
+    for line in lines:
+        coords, _, label = line.strip().split(', ')
+        x, y = map(int, coords.strip('[]').split(','))
+        grid_data[(x, y)] = label  # Extract the label
+
+    for i in range(8):  # 8 rows
+        for j in range(12):  # 12 columns
+            # Adjust coordinates to match the .txt file format
+            adjusted_i = 8 - i
+            adjusted_j = j + 1
+
+            label_text = grid_data.get((adjusted_i, adjusted_j), "")
 
             # Create buttons for each cell and attach a function to their click event
             if label_text == "NAN":
@@ -282,6 +334,7 @@ def balance_window():
 
 # Display balance manifest
 def display_balance(lines):
+    global json_data, current_step, step_info_label, step_details_label
     the_balance_window = tk.Toplevel(root)
     the_balance_window.title("Balance")
     main_frame = tk.Frame(the_balance_window)
@@ -313,38 +366,38 @@ def display_balance(lines):
     clear_button = tk.Button(left_frame, text="Clear", command=lambda: update_content_display(""))
     clear_button.pack(pady=5)
 
-    # 8x12 grid display
-    frame = tk.Frame(main_frame)
-    frame.pack()
+    json_data = read_json_data()
+    if json_data is None:
+        print("Error reading JSON data")
+        return
+
+    total_steps = len(json_data["steps"])
+    total_time = json_data["totalTime"]
+    step_data = json_data["steps"][current_step - 1]
+    start_coords = tuple(map(int, step_data["start"]))
+    dest_coords = tuple(map(int, step_data["dest"]))
+
+    # Displaying current step and total steps
+    step_info_label = tk.Label(left_frame, text=f"Step {current_step} of {len(json_data['steps'])}", font=("Arial", 16))
+    step_info_label.pack(pady=5)
+
+    step_details_label = tk.Label(left_frame,
+                                  text=f"Start: {tuple(map(int, json_data['steps'][current_step - 1]['start']))} -> Dest: {tuple(map(int, json_data['steps'][current_step - 1]['dest']))}",
+                                  font=("Arial", 14))
+    step_details_label.pack(pady=5)
+
+    # Displaying total time
+    total_time_label = tk.Label(left_frame, text=f"Total Time: {total_time}", font=("Arial", 14))
+    total_time_label.pack(pady=5)
+
+    # Next button to update the step display
+    next_button = tk.Button(left_frame, text="Next", command=update_step_display)
+    next_button.pack(pady=5)
 
     buttons_dict = {}  # Dictionary to keep track of buttons
 
-    def is_symmetrical(grid_data):
-        rows = len(grid_data)
-        cols = len(grid_data[0]) if rows > 0 else 0
-        mid_col = cols // 2
-
-        for i in range(rows):
-            for j in range(mid_col):
-                if grid_data[i][j] != grid_data[i][cols - 1 - j]:
-                    return False
-        return True
-
-    def check_symmetry():
-        grid_data = [[buttons_dict[(i, j)].cget('text') for j in range(12)] for i in range(8)]
-        if not is_symmetrical(grid_data):
-            print("These cells aren't symmetrical")
-            messagebox.showwarning("Symmetry Check", "These cells aren't symmetrical")
-        else:
-            print("The grid is symmetrical")
-            messagebox.showinfo("Symmetry Check", "The grid is symmetrical")
-
-    # Add a button to trigger the symmetry check
-    symmetry_check_button = tk.Button(left_frame, text="Check Symmetry", command=check_symmetry)
-    symmetry_check_button.pack(pady=5)
-
     # Textbox for entering messages
-    message_textbox = tk.Text(left_frame, height=3, width=40)
+    message_textbox = tk.Text(left_frame, height=4, width=40)
     message_textbox.pack(pady=10)
 
     # Function to clear the message textbox
@@ -365,11 +418,27 @@ def display_balance(lines):
     submit_button = tk.Button(left_frame, text="Submit", command=submit_message)
     submit_button.pack(pady=5)
 
-    for i in range(7, -1, -1):
-        for j in range(12):
-            data = lines[(7 - i) * 12 + j].strip().split(', ')
-            label_text = data[2]
-            # Create buttons for each cell and attach a function to their click event
+    # 8x12 grid display
+    frame = tk.Frame(main_frame)
+    frame.pack()
+
+    # Parsing the .txt file data
+    grid_data = {}
+    for line in lines:
+        coords, _, label = line.strip().split(', ')
+        x, y = map(int, coords.strip('[]').split(','))
+        grid_data[(x, y)] = label
+
+    # Generating the grid
+    for i in range(8):  # 8 rows
+        for j in range(12):  # 12 columns
+            # Adjust coordinates to match the .txt file format
+            adjusted_i = 8 - i
+            adjusted_j = j + 1
+
+            label_text = grid_data.get((adjusted_i, adjusted_j), "")
+
+            # Creating buttons with labels from .txt file
             if label_text == "NAN":
                 btn = tk.Button(frame, text="", borderwidth=1, relief="solid", width=8, height=2,
                                 bg="grey", state=tk.DISABLED)
@@ -380,7 +449,7 @@ def display_balance(lines):
                 btn = tk.Button(frame, text=label_text, borderwidth=1, relief="solid", width=8, height=2,
                                 bg="light green", state=tk.DISABLED)
             btn.grid(row=i, column=j)
-            buttons_dict[(i, j)] = btn  # Store buttons in dictionary
+            buttons_dict[(adjusted_i, adjusted_j)] = btn
 
     # Create the 4x24 grid for buffer
     buffer_grid_frame = tk.Frame(main_frame)
