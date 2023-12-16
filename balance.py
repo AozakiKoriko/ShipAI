@@ -205,13 +205,14 @@ class Balancing:
                     move_cost = cur_node.move_cost + new_gn - cur_node.gn
                     from_slot = [[cur_node.curr_slot[0] + 1, cur_node.curr_slot[1] + 1], "Ship"]
                     to_slot = [[top_slot[0]+1, top_slot[1]+1], "Ship"]
-                    new_path = copy.copy(cur_node.path)
-                    new_path.append([from_slot, to_slot, move_cost])
                     #new_path = cur_node.path + "Move container at [" + str(cur_node.curr_slot) + " to " + str(top_slot) + ".\n"
                     empty_container = new_matrix[top_slot[0]][top_slot[1]]
                     new_matrix[top_slot[0]][top_slot[1]] = saved_container
                     new_matrix[cur_node.curr_slot[0]][cur_node.curr_slot[1]] = empty_container
                     #checker = int_type_matrix(new_matrix)
+                    visual_matrix = generate_visible_cur_matrix(new_matrix)
+                    new_path = copy.copy(cur_node.path)
+                    new_path.append([from_slot, to_slot, move_cost, visual_matrix])
                     temp_node = self.Node(top_slot, new_gn, new_matrix, new_path, temp_state, 0)
                     if any(are_arrays_same(node.slot_matrix, new_matrix) for node in self.closed_list):
                         continue
@@ -499,8 +500,9 @@ class No_Branch_Hard_Blance:
                     from_slot = [[cur_node.curr_slot[0] + 1, cur_node.curr_slot[1] + 1], start_loc]
                     to_slot = [[top_slot[0]+1, top_slot[1]+1], "Ship"]
                     new_path = copy.copy(cur_node.path)
-                    new_path.append([from_slot, to_slot, move_cost])
                     new_slot_matrix[top_slot[0]][top_slot[1]] = saved_container
+                    visual_matrix = generate_visible_cur_matrix(new_matrix)
+                    new_path.append([from_slot, to_slot, move_cost, visual_matrix])
                     temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array, 0)
                     if any(are_arrays_same(node2.slot_matrix, new_slot_matrix) for node2 in self.closed_list):
                         continue
@@ -896,7 +898,19 @@ def generate_manifest(filename, container_array):
             for col_index, container in enumerate(row):
                 position = f"[{row_index+1:02d},{col_index+1:02d}]"
                 weight = f"{{{container.weight:05d}}}"
-                file.write(f"{position}, {weight} {container.name}\n")
+                file.write(f"{position}, {weight}, {container.name}\n")
+
+def generate_visible_cur_matrix(slot_matrix):
+    array2D = []
+    for row in slot_matrix:
+        row_list = []
+        for container in row:
+            if container.name == "UNUSED":
+                row_list.append("F")
+            else:
+                row_list.append("T")
+        array2D.append(row_list)
+    return array2D
 
 def run(doc_path):
     file_path = doc_path
@@ -914,7 +928,8 @@ def run(doc_path):
                 "startLoc": step[0][1],
                 "dest": [str(step[1][0][0]), str(step[1][0][1])],
                 "destLoc": step[1][1],
-                "time": step[2]
+                "time": step[2],
+                "array": step[3]
             }
             steps_json.append(step_json)
 
@@ -930,6 +945,8 @@ def run(doc_path):
 
         new_file_path = file_path[:-4] + "_Updated" + ".txt"
         generate_manifest(new_file_path, N.slot_matrix)
+
+        #print(generate_visible_cur_matrix(N.slot_matrix))
 
         return True
     else:
