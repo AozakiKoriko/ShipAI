@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin-top: 150px;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 10vh;
+        overflow: hidden;
+    }
+    
+    #loginPage {
+        background-color: rgb(254, 254, 254);
+        padding: 45%; /* Adjust this value as needed */
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    
+    h1 {
+        color: #0b0b0b;
+        font-size: 50px;
+    }
+    
+    p {
+        color: #666;
+        font-size: 30px
+    }
+    
+    .login-form input[type="text"] {
+        width: 120%;
+        padding: 10px;
+        margin: 20px 0;
+        font-size: 30px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    
+    .login-form button {
+        width: 120%;
+        padding: 20px;
+        background-color: #5cb85c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .login-form button:hover {
+        background-color: #4cae4c;
+    }
+    
+</style>
+<body>
+    <div id="loginPage">
+        <h1>Welcome!</h1>
+        <p>Please enter your name:</p>
+        <form id="loginForm" class="login-form" action="http://127.0.0.1:5000/login" method="post">
+            <input type="text" name="username" id="nameInput" placeholder="Your Name" required>
+            <button type="submit">Submit</button>
+        </form>        
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            window.location.href = 'import.html';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Balance System</title>
+<link rel = "stylesheet" href="static/balance.css"
+</head>
+<body>
+<div class="header">
+  <h1 class="title">Balance</h1>
+  <form id="loginForm" class="login-form">
+    <label for="username">Login:</label>
+    <input type="text" id="username" name="username" placeholder="Enter Username">
+    <button type="submit" id="submit-button">Submit</button>
+    <button type="button" id="restore-button">Restore</button>
+    <button type="button" id="exit-button">Exit</button>
+  </form>
+</div>
+    
+<div class="main">
+  <div class="border">
+    <div class="sidebar">
+      <h3>Notification</h3>
+      <p>The containers on this ship can be balanced, click start to continue.</p>
+      <button>Add</button>
+      <button>Next</button>
+      </div>
+      <div class="message-box">
+        <input type="text" id="message" placeholder="Edit message...">
+        <button id="send">Send</button>
+    </div>
+    <div class="truck-area">
+      <label for="truck">Truck</label>
+      <div class="truck-grid">
+      </div>
+    </div>
+  </div>
+  <div class ="content">
+    <label for="grid">Containers Area</label> 
+    <div class="grid">
+      <!-- Grid cells -->
+      <!-- Create 12x8 grid cells -->
+    </div>
+  </div>
+</div>
+
+<div class = "buffer-content">
+    <label for="buffer">Buffer Area</label> 
+    <div class="buffer">
+      <!-- Buffer cells -->
+      <!-- Create 4x24 buffer cells -->
+    </div>
+ </div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+  event.preventDefault(); // Prevents the default form submission
+  const username = document.getElementById('username').value;
+  // Handle the username (e.g., send it to a server or validate it)
+  console.log('Username submitted:', username);
+});
+  
+const buffer = document.querySelector('.buffer');
+for (let i = 0; i < 4*24; i++) {
+  const cell = document.createElement('button');
+  cell.className = 'buffer-cell btn';
+  buffer.appendChild(cell);
+}
+
+const grid = document.querySelector('.grid');
+for (let i = 0; i < 8*12; i++) {
+  const cell = document.createElement('button');
+  cell.className = 'grid-cell btn';
+  grid.appendChild(cell);
+}
+
+const truckGrid = document.querySelector('.truck-grid');
+for (let i = 0; i < 1; i++) {
+  const cell = document.createElement('button');
+  cell.className = 'truck-cell btn';
+  truckGrid.appendChild(cell);
+}
+
+const exitButton = document.getElementById('exit-button');
+      exitButton.addEventListener('click', () => {
+          // Redirect to the '/options' route
+          window.location.href = '/options';
+      });
+// Function to add the shine effect and then display the message
+function addShineEffectAndDisplayMessage(button, message) {
+  button.classList.add('shine-effect');
+
+  setTimeout(() => {
+    button.classList.remove('shine-effect');
+
+    alert('Message sent: ' + message);
+  }, 100); 
+}
+
+// Event listener for the Send button
+document.getElementById('send').addEventListener('click', function() {
+  var message = document.getElementById('message').value;
+
+  // Call the function to add the effect and then display the message
+  addShineEffectAndDisplayMessage(this, message);
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+  document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', () => {
+      button.classList.toggle('clicked');
+    });
+  });
+});
+
+document.querySelectorAll('.grid-cell, .buffer-cell, .truck-cell').forEach(button => {
+  button.addEventListener('click', () => {
+    button.classList.add('blinking');
+  });
+});
+
+document.getElementById('stop-blinking').addEventListener('click', () => {
+  document.querySelectorAll('.grid-cell.blinking, .buffer-cell.blinking, .truck-cell.blinking').forEach(button => {
+    button.classList.remove('blinking');
+  });
+});
+
+</script>
+</body>
+</html>

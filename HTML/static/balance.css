@@ -1,0 +1,271 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+  }
+  
+  .title {
+    margin: 0; 
+  }
+  .login-form {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    gap: 10px; /* Adjust the space between form items */
+  }
+  
+  .login-form label {
+    margin-right: 5px;
+    font-size: 20px;
+  }
+  
+  #username {
+    font-size: 1em;
+    padding: 10px;
+  }
+
+  #submit-button {
+    padding: 12px 20px; /* Top & Bottom, Left & Right padding */
+    font-size: 20px; /* Size of the text inside the button */
+    border: none; /* Removes the default border */
+    border-radius: 4px; /* Optional: Rounds the corners of the button */
+    cursor: pointer; /* Changes the cursor on hover for better UX */
+    background-color: white;
+    color:#000
+    
+  }
+
+  #restore-button {
+    padding: 12px 20px; /* Top & Bottom, Left & Right padding */
+    font-size: 20px; /* Size of the text inside the button */
+    border: none; /* Removes the default border */
+    border-radius: 4px; /* Optional: Rounds the corners of the button */
+    cursor: pointer; /* Changes the cursor on hover for better UX */
+    background-color: green; /* Sets the background color to green */
+    color: white; /* Sets the text color to white */
+    /* Add other styling as needed, such as padding, border, etc. */
+  }
+  
+  #exit-button {
+    padding: 12px 20px; /* Top & Bottom, Left & Right padding */
+    font-size: 20px; /* Size of the text inside the button */
+    border: none; /* Removes the default border */
+    border-radius: 4px; /* Optional: Rounds the corners of the button */
+    cursor: pointer; /* Changes the cursor on hover for better UX */
+    background-color: red; /* Example color for the 'Exit' button */
+    color: white;
+    /* Add other styling as needed to match the 'Restore' button */
+  }
+  
+  .main {
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+  }
+
+  .title {
+    font-size: 30px; /* Change this value to increase or decrease the size of the text */
+    font-family: 'Arial', sans-serif; /* This is optional if you want to change the font */
+    /* You can add more styling properties if needed */
+  }
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .sidebar {
+    flex:1;
+    width: 450px;
+    margin-right: 20px;
+    border: 2px solid #000;
+    padding: 10px;
+    border-right: 2px solid black; /* Add a border to separate from the main content */
+  }
+  
+  .sidebar h3 {
+    font-size: 30px; /* Adjust the value to change the size of the header text */
+    /* You can also add other font properties here, like font-family, font-weight, etc. */
+  }
+  
+  .sidebar p {
+    font-size: 20px; /* Adjust the value to change the size of the paragraph text */
+    /* Additional styling as needed */
+  }
+  
+  .sidebar button {
+    font-size: 20px;
+    margin-left: 5vw;
+    margin-right: 20px;
+  }
+  
+  .main-contain {
+    width: 70%; /* sets the width of the container to 80% of its parent element */
+    margin: auto; /* centers the container within its parent element */
+    padding: 10px; /* adds space inside the container around the content */
+    background-color: whie; /* sets a background color for the container */
+    border: 1px solid #000; /* adds a border around the container */
+  }
+  
+  .message-box {
+    flex:1;
+    border: 2px solid #000; /* Example border to make it look like a box */
+    padding: 10px;
+    margin-top: 20px; /* Adjust as needed */
+    margin-right: 20px;
+    border-right: 2px solid black;
+  }
+  
+  .message-box input[type="text"] {
+    padding: 25px;
+    margin-right: 8px; /* Space between the input and the button */
+    border: 2px solid #000;
+    width: calc(100% - 50px); /* Adjust the width as needed */
+    font-size: 20px;
+  }
+  
+  .message-box button {
+    margin-top: 10px;
+    padding: 10px 50px;
+    background-color: #5cb85c;
+    color: rgb(21, 20, 20);
+    border: 2px solid #000;
+    cursor: pointer;
+    font-size: 20px;
+  }
+    
+  .content {
+    border: 2px solid #000;
+    padding: 5px
+  }
+  .grid {
+    display: grid;
+    margin-top: 5px;
+    grid-template-columns: repeat(12, 1fr); 
+    grid-template-rows: repeat(8, 1fr); 
+    row-gap: 2px;
+    column-gap: 2px;
+    padding: 5px
+  }
+  .grid-cell {
+    width: 3vw; 
+    height: 3vw;
+    min-width: 20px;
+    min-height: 20px;
+    max-width: 50px;
+    max-height: 50px;
+    background-color: white;
+    border: 1px solid #000;
+  }
+  .buffer-content {
+    width: 80%;
+    margin: auto;
+    padding: 5px;
+    background-color: white;
+    border: 1px solid #000;
+  }
+  .buffer {
+    margin-top: 5px;
+    display: grid;
+    grid-template-columns: repeat(24, 0.5fr); /* 24 columns */
+    gap: 3px;
+    padding: 5px;
+  }
+  .buffer-cell {
+    width: 2vw; 
+    height: 2vw;
+    min-width: 15px;
+    min-height: 15px;
+    max-width: 50px;
+    max-height: 50px;
+    background-color: white;
+    border:1px solid #000;
+    gap:3px;
+  }
+  .truck-area {
+    position: relative; /* Use absolute for exact positioning */
+    width: 90%; /* Set the width as needed */
+    padding: 10px;
+    text-align: right; /* Center the label text */
+  }
+  
+  .truck-grid {
+    display: grid;
+    position: relative;
+    grid-template-columns: repeat(1, 1fr); /* Adjust the number of columns as needed */
+    justify-content: right; /* Center the grid in the truck area */
+    align-items: end;
+  }
+  
+  .truck-cell {
+    position: absolute;
+    top:10px;
+    right:0px;
+    width: 40px;
+    height: 40px; 
+    background-color: white; 
+    border: 2px solid black;
+  }
+  
+  @keyframes shine {
+    from {
+      background-color: initial; /* Replace with the initial color of your button */
+      box-shadow: none;
+    }
+    to {
+      background-color: #ffff99; /* Temporary highlight color */
+      box-shadow: 0 0 15px #ffff99; /* Adjust color and size as needed */
+    }
+  }
+  .shine-effect {
+    animation: shine 1s forwards;
+  }
+
+  @media only screen and (max-width: 500px) {
+    .grid-cell, .buffer-cell, .truck-cell {
+      width: 20%;
+      height: 10%;
+    }
+  }
+  .btn {
+    /* Basic button styling */
+    border: 2px solid #000;
+    cursor: pointer;
+    padding: 5px;
+    margin: 5px;
+    transition: transform 0.5s;
+  }
+  
+  @keyframes shine {
+    from {
+      background-color: initial; /* Replace with the initial color of your button */
+      box-shadow: none;
+    }
+    to {
+      background-color: #ffff99; /* Temporary highlight color */
+      box-shadow: 0 0 15px #ffff99; /* Adjust color and size as needed */
+    }
+  }
+  .shine-effect {
+    animation: shine 1s forwards;
+  }
+  
+  @keyframes blink {
+    0% { background-color: #f29e9e; }
+    50% { background-color: red; }
+    100% { background-color: #fba5a5; }
+  }
+  
+  .blinking {
+    animation: blink 1s infinite;
+  }
+  

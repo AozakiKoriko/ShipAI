@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Options Page</title>
+    <link rel="stylesheet" type="text/css" href="static/options.css">
+
+</head>
+<body>
+    <div id="optionsPage">
+        <h2>Hello, {{ username }}!</h2>
+        <p>Select an option:</p>
+        <button id="loadUnloadButton">Load & Unload</button>
+        <button id="balanceButton">Balance</button>
+        <form id="newLoginForm" class="login-form">
+            <label for="newUsername">Login:</label>
+            <input type="text" id="newUsername" name="newUsername" placeholder="Enter Username">
+            <button type="submit" id="newLoginSubmit">Submit</button>
+            <button type="button" id="exit-button">Exit</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('newLoginForm').addEventListener('submit', (event) => {
+                event.preventDefault();
+                const username = document.getElementById('newUsername').value;
+
+                fetch('/newLogin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: username })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Username logged successfully.');
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            });
+
+            document.getElementById('loadUnloadButton').addEventListener('click', () => {
+                window.location.href = '/load_and_unload'; 
+            });
+
+            document.getElementById('balanceButton').addEventListener('click', () => {
+                window.location.href = '/balance';
+            });
+
+            const exitButton = document.getElementById('exit-button');
+            exitButton.addEventListener('click', () => {
+                window.location.href = 'static/import.html';
+            });
+
+        });
+    </script>
+</body>
+</html>

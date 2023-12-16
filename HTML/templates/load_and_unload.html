@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load & Unload System</title>
+<link rel = "stylesheet" href="static/load_and_unload.css"
+</head>
+<body>
+
+<div class="header">
+  <h1 class="title">Load & Unload</h1>
+  <form id="loginForm" class="login-form" action="http://127.0.0.1:5000/newLogin" method="post">
+    <label for="username">Login:</label>
+    <input type="text" id="username" name="username" placeholder="Enter Username">
+    <button type="submit" id="submit-button">Submit</button>
+    <button type="button" id="restore-button">Restore</button>
+    <button type="button" id="exit-button">Exit</button>
+  </form>
+</div>
+    
+<div class="main">
+  <div class="border">
+    <div class="sidebar">
+      <!-- Select Containers Section -->
+      <div id="select-containers">
+        <h3 id="sidebar-title">Select Containers</h3>
+        <p id="container-names">Please select containers to unload.</p>
+        <button id="add-button">Add</button>
+        <button id="next-button">Next</button>
+      </div>
+
+      <!-- Load Container Information Section -->
+      <div id="load-container-info" style="display:none;">
+        <div class="container-info">
+          <label for="container-description">Container Description:</label>
+          <input type="text" id="container-description" placeholder="Enter Description">
+        </div>
+        <div class="container-info">
+          <label for="container-weight">Weight (kg):</label>
+          <input type="number" id="container-weight" placeholder="Enter Weight">
+        </div>
+        <div class="button-container">
+          <button id="add-container-info">Add</button>
+          <button id="start-load-unload">Start</button>
+        </div>
+      </div>
+
+      <!-- Step Information Section -->
+      <div id="stepInfo" style="display: none;">
+        <p>Step <span id="currentStep">0</span> of <span id="totalSteps">0</span>:</p>
+        <p>Total time estimation: <span id="totalTime">0</span> mins</p>
+        <p>Container: <span id="containerInfo">None</span></p>
+        <p>Time estimation: <span id="timeEstimation">0</span> mins</p>
+        <p>Move <span id="moveFrom">---</span> to <span id="moveTo">---</span></p>
+        <button id="nextStepButton">Next</button>
+      </div>
+    </div>
+      <div class="message-box">
+        <input type="text" id="user-message" placeholder="Edit message...">
+        <button id="send">Send</button>
+    </div>
+    <div class="truck-area">
+      <label for="truck">Truck</label>
+      <div class="truck-grid">
+      </div>
+    </div>
+  </div>
+  <div class ="content">
+    <label for="grid">Containers Area</label> 
+    <div class="grid">
+    </div>
+  </div>
+</div>
+
+<div class = "buffer-content">
+    <label for="buffer">Buffer Area</label> 
+    <div class="buffer">
+    </div>
+</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.getElementById('loginForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+    
+        fetch('/newLogin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: username })
+        })
+          .then(response => response.json())
+          .then(data => {
+            alert('Username logged successfully.');
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      });
+    
+      // Generate buffer cells
+      const buffer = document.querySelector('.buffer');
+      for (let i = 0; i < 4 * 24; i++) {
+        const cell = document.createElement('button');
+        cell.className = 'buffer-cell btn';
+        buffer.appendChild(cell);
+      }
+    
+      // Generate truck grid cells
+      const truckGrid = document.querySelector('.truck-grid');
+      for (let i = 0; i < 1; i++) {
+        const cell = document.createElement('button');
+        cell.className = 'truck-cell btn';
+        truckGrid.appendChild(cell);
+      }
+    
+      const exitButton = document.getElementById('exit-button');
+      exitButton.addEventListener('click', () => {
+        // Redirect to the '/options' route
+        window.location.href = '/options';
+      });
+    
+      const containerNames = document.getElementById('container-names');
+      const addButton = document.getElementById('add-button');
+      const nextButton = document.getElementById('next-button');
+      let isAddButtonClicked = false;
+      
+      addButton.addEventListener('click', () => {
+        containerNames.textContent = 'Container name:';
+        isAddButtonClicked = true;
+      });
+    
+      const containers = {
+        selected: [], // To store selected containers
+        loaded: [],   // To store loaded containers
+      };
+
+      let selectedContainers = []; 
+      let loadedContainers = [];   
+      document.getElementById('saveButton').addEventListener('click', function() {
+        // Construct the payload
+        const payload = {
+            selectedContainers: selectedContainers,
+            loadedContainers: loadedContainers
+        };
+    
+        // Make the AJAX request to send data to the Flask server
+        fetch('/save-containers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            // Additional code to handle successful response
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+      function selectContainer(name, weight, row, column) {
+          selectedContainers.push({ name, weight, row, column });
+      }
+
+      // Example function to add a container to loadedContainers
+      function loadContainer(name, weight, location) {
+          loadedContainers.push({ name, weight, location });
+      }
+
+      // Function to send data to the server
+      function saveContainersData() {
+          const data = { selectedContainers, loadedContainers };
+          fetch('/save-containers', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(data => console.log('Data saved:', data))
+          .catch(error => console.error('Error:', error));
+      }
+
+    
+      function handleGridCellClick(event) {
+        if (isAddButtonClicked) { // Check if the Add button was clicked
+          const gridCell = event.target;
+          const cellContent = gridCell.textContent.trim();
+          if (cellContent !== '-1' && cellContent !== '0') {
+            if (gridCell.style.backgroundColor !== 'lightblue') {
+              gridCell.style.backgroundColor = 'lightblue';
+              if (cellContent !== '') {
+                containerNames.textContent += ` ${cellContent}`; // Add cell content
+    
+                // Calculate row and column
+                const numRows = 8; // Update with your actual number of rows
+                const numColumns = 12; // Update with your actual number of columns
+                const cellIndex = Array.from(gridCell.parentNode.children).indexOf(gridCell);
+                const row = Math.floor(cellIndex / numColumns) + 1; // Adding 1 to make it 1-based
+                const column = (cellIndex % numColumns) + 1; // Adding 1 to make it 1-based
+    
+                // Add selected container data to the containers.selected array
+                containers.selected.push({
+                  name: cellContent,
+                  row: row,
+                  column: column,
+                });
+              }
+            } else {
+              // Change back to white and remove name from the list
+              gridCell.style.backgroundColor = 'white';
+              containerNames.textContent = containerNames.textContent.replace(` ${cellContent}`, ''); // Remove cell content
+    
+              // Remove the selected container data from the containers.selected array
+              containers.selected = containers.selected.filter(container => container.name !== cellContent);
+            }
+          }
+        }
+      }
+    
+      // Event listener for the "Next" button
+      nextButton.addEventListener('click', () => {
+        const loadContainerInfo = document.getElementById('load-container-info');
+        const sidebarTitle = document.getElementById('sidebar-title');
+    
+        if (loadContainerInfo.style.display === 'none') {
+          // Switch to "Enter Load Container information" state
+          sidebarTitle.textContent = 'Enter Load Container';
+          containerNames.textContent = '';
+          addButton.style.display = 'none';
+          nextButton.style.display = 'none';
+          loadContainerInfo.style.display = 'block';
+          const startButton = document.getElementById('start-load-unload');
+          startButton.style.display = 'block';
+        } else {
+          // Switch back to "Select Containers" state
+          sidebarTitle.textContent = 'Select Containers';
+          containerNames.textContent = 'Please select containers to unload.';
+          addButton.style.display = 'inline-block';
+          nextButton.style.display = 'inline-block';
+          loadContainerInfo.style.display = 'none';
+          const startButton = document.getElementById('start-load-unload');
+          startButton.style.display = 'none';
+        }
+      });
+    
+      const addContainerInfoButton = document.getElementById('add-container-info');
+      const containerDescriptionInput = document.getElementById('container-description');
+      const containerWeightInput = document.getElementById('container-weight');
+    
+      
+      addContainerInfoButton.addEventListener('click', () => {
+        const containerDescription = containerDescriptionInput.value;
+        const containerWeight = containerWeightInput.value;
+    
+        // Create an object to store load container information
+        const loadContainer = {
+          name: containerDescription,
+          weight: containerWeight,
+          location: 'truck',
+        };
+    
+        // Add the load container to the containers.loaded array
+        containers.loaded.push(loadContainer);
+    
+        // Clear the input fields
+        containerDescriptionInput.value = '';
+        containerWeightInput.value = '';
+      });
+    
+      const startButton = document.getElementById('start-load-unload');
+      const loadContainerInfo = document.getElementById('load-container-info');
+      const stepInfo = document.getElementById('stepInfo');
+
+      startButton.addEventListener('click', () => {
+        // Hide load container information section
+        document.getElementById('load-container-info').style.display = 'none';
+        // Show step information section
+        stepInfo.style.display = 'block';
+
+        // Fetch the first step information (if applicable)
+        fetchNextStep(); 
+      });
+
+      // Function to fetch the next step information
+      function fetchNextStep() {
+        fetch('/get_next_step')
+          .then(response => response.json())
+          .then(data => {
+            updateStepInfo(data); // Update the UI with the step information
+          })
+          .catch(error => console.error('Error:', error));
+      }
+
+      // Function to update the UI with the step information
+      function updateStepInfo(data) {
+        document.getElementById('currentStep').textContent = data.currentStep;
+        document.getElementById('totalSteps').textContent = data.totalSteps;
+        document.getElementById('totalTime').textContent = data.totalTime;
+        document.getElementById('containerInfo').textContent = data.containerName;
+        document.getElementById('timeEstimation').textContent = data.timeEstimation;
+        document.getElementById('moveFrom').textContent = `[${data.moveFrom.row}, ${data.moveFrom.column}]`;
+        document.getElementById('moveTo').textContent = `[${data.moveTo.row}, ${data.moveTo.column}]`;      }
+
+      // Next step button event listener
+      document.getElementById('nextStepButton').addEventListener('click', () => {
+        fetchNextStep(); // Fetch the next step information
+      });
+        
+      // Event listener for the Send button
+      document.getElementById('send').addEventListener('click', () => {
+        const message = document.getElementById('user-message').value;
+        const username = "{{ username }}";
+    
+        fetch('/log_message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: username, message: message })
+        })
+          .then(response => response.json())
+          .then(data => {
+            alert('Message logged successfully');
+            document.getElementById('user-message').value = ''; 
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      });
+
+    document.getElementById('nextStepButton').addEventListener('click', function() {
+      fetch('/get_next_step')
+          .then(response => response.json())
+          .then(data => {
+              updateSidebar(data);
+          })
+          .catch(error => console.error('Error:', error));
+      });
+  
+    
+      function handleButtonClick(event) {
+        var button = event.target;
+        button.classList.toggle('clicked');
+      }
+    
+      document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', handleButtonClick);
+      });
+    
+      // Handling the templated data from Jinja2
+      var arrayData = {{ array_result | safe }};
+    
+      // Processing the array data to update the grid
+      const grid = document.querySelector('.grid');
+      arrayData.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+          const gridCell = document.createElement('button');
+          gridCell.className = 'grid-cell btn';
+          gridCell.textContent = cell;  // Display the cell value
+          if (cell === -1) {
+            gridCell.style.backgroundColor = 'black';
+          } else if (cell === 0) {
+            gridCell.style.backgroundColor = 'white';
+            gridCell.textContent = ' ';
+          } else {
+            gridCell.textContent = cell;
+          }
+          grid.appendChild(gridCell);
+          gridCell.addEventListener('click', handleGridCellClick);
+        });
+      });
+    });
+    // Function to start blinking the specified elements
+    function startBlinking(startElementId, destElementId) {
+      const startElement = document.getElementById(startElementId);
+      const destElement = document.getElementById(destElementId);
+
+      if (startElement) {
+          startElement.classList.add('blinking');
+      }
+
+      if (destElement && destElementId !== startElementId) {
+          destElement.classList.add('blinking');
+      }
+  }
+
+  // Function to stop blinking all elements
+  function stopBlinking() {
+      const blinkingElements = document.querySelectorAll('.blinking');
+      blinkingElements.forEach(element => {
+          element.classList.remove('blinking');
+      });
+  }
+
+  // Update the step information and start blinking
+  function updateStepInfo(data) {
+      document.getElementById('currentStep').textContent = data.No;
+      document.getElementById('totalSteps').textContent = data.totalSteps;
+      document.getElementById('totalTime').textContent = data.totalTime;
+      document.getElementById('containerInfo').textContent = data.containerName;
+      document.getElementById('timeEstimation').textContent = data.timeEstimation;
+      document.getElementById('moveFrom').textContent = `[${data.moveFrom.row}, ${data.moveFrom.column}]`;
+      document.getElementById('moveTo').textContent = `[${data.moveTo.row}, ${data.moveTo.column}]`;
+
+      // Calculate the IDs for the start and destination elements
+      const startElementId = getElementId(data.moveFrom.row, data.moveFrom.column);
+      const destElementId = getElementId(data.moveTo.row, data.moveTo.column);
+
+      // Start blinking the start and destination elements
+      startBlinking(startElementId, destElementId);
+  }
+
+  // Helper function to get the element ID based on row and column
+  function getElementId(row, column) {
+      if (row === null || column === null) {
+          return 'truck-grid'; // Assuming 'truck-grid' is the ID for the truck area
+      }
+      return `grid-cell-${row}-${column}`; // Modify as per your actual ID structure
+  }
+
+  // When moving to the next step, stop the current blinking
+  document.getElementById('nextStepButton').addEventListener('click', () => {
+      stopBlinking(); // Stop current blinking
+      fetchNextStep(); // Fetch the next step information
+  });
+
+  // Fetch the first step information (if applicable)
+  function fetchNextStep() {
+      fetch('/get_next_step')
+          .then(response => response.json())
+          .then(data => {
+              updateStepInfo(data); // Update the UI with the step information
+          })
+          .catch(error => console.error('Error:', error));
+  }
+
+  </script>
+</body>
+</html>
