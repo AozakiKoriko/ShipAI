@@ -501,7 +501,7 @@ class No_Branch_Hard_Blance:
                     to_slot = [[top_slot[0]+1, top_slot[1]+1], "Ship"]
                     new_path = copy.copy(cur_node.path)
                     new_slot_matrix[top_slot[0]][top_slot[1]] = saved_container
-                    visual_matrix = generate_visible_cur_matrix(new_matrix)
+                    visual_matrix = generate_visible_cur_matrix(new_slot_matrix)
                     new_path.append([from_slot, to_slot, move_cost, visual_matrix])
                     temp_node = self.Node2(top_slot, new_gn, new_slot_matrix, new_path, temp_state, cur_node.result_array, 0)
                     if any(are_arrays_same(node2.slot_matrix, new_slot_matrix) for node2 in self.closed_list):
@@ -938,6 +938,9 @@ def run(doc_path):
             "currentSteps": 1,
             "totalTime": N.get_gn()
         }
+
+        if N.get_gn() == 0:
+            return False
 
         json_output = json.dumps(final_json_structure, indent=4)
         with open('output.json', 'w') as file:
