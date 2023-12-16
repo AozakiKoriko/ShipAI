@@ -155,6 +155,10 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
                 if all(j[1] != i[1] for j in block_list):
                     sel_loc = i
                     found_target_without_block = True
+                else:
+                    if all(j[0] < i[0] for j in block_list):
+                        sel_loc = i
+                        found_target_without_block = True
                     break
         
             #Situation 2: if have cargos can directly offload (have't blocks)

@@ -12,14 +12,14 @@ def find_block_list(array, target_list):
     target_ys = set(y for _, y in target_list)
     block_list = []
     for i in range(len(array)):
-        if i != 8 and i >= min_i:
+        if i != 8 and i > min_i:
             for j in range(len(array[i])):
-                if j in target_ys and array[i][j] != 0 and (i, j) not in target_list:
+                if j in target_ys and array[i][j] != 0 and array[i][j] != -1 and (i, j) not in target_list:
                     block_list.append((i, j))
     return block_list
 
 
-manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase4.txt"
+manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase5.txt"
 
 # write cargo information to grid
 cargos = parse_cargo_info( manifest_path )
@@ -27,19 +27,20 @@ grid = fill_grid_with_cargos(cargos)
 initial_ship = grid
 
 #user input targets
-initial_target_list = [(1,4)]
+initial_target_list = [(0,1),(0,5)]
 
 #get block list
 block_list = find_block_list(initial_ship, initial_target_list)
 initial_block_list = block_list
+print("Block cargos: ",block_list)
 
 
 
 #user input onload cargos
-initial_onload_list = ["ONLOAD"]
+initial_onload_list = ["XXX","YYY"]
 
 #user input weight for onload cargos
-weight_list = [100]
+weight_list = [100, 200]
 
 #initial arm location, should not change
 initial_arm_loc = (8,0)
@@ -52,13 +53,14 @@ start_node = Node(initial_ship, initial_target_list, initial_block_list, initial
 
 path = a_star(start_node, goal_reached, get_neighbors)
 
-
+total_cost = 0
 for node in path:
     for row in reversed(node.ship):
-        print("   ".join(str(item) for item in row))
+        print("   ".join(f"{str(item):>4}" for item in row))
     print("Arm:", node.arm_loc)
     print("Move cargo from: ", node.sel_loc, "to ", node.mov_loc, ",cost: ", node.cost, "minutes.")
-    print("-" * 20)  
+    total_cost += node.cost
+    print("-" * 100)  
     if node.sel_loc == "truck":
         for i in cargos:
             if i.position == node.mov_loc:
@@ -81,7 +83,8 @@ for node in path:
             elif i.position == node.sel_loc:
                 i.name = "UNUSED"
                 i.weight = 0
-               
+print("Total cost: ", total_cost, " minutes.")
+
 # Write to JSON
 def path_to_json(path):
     steps = []
@@ -98,7 +101,8 @@ def path_to_json(path):
 
     output = {
         "steps": steps,
-        # "currentSteps": 1  
+        "currentSteps": None,
+        "totalTime": total_cost,   
     }
 
     # write to json
