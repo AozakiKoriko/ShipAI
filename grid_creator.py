@@ -1,6 +1,3 @@
-from manifest_import import parse_cargo_info
-from manifest_import import Cargo
-
 def fill_grid_with_cargos(cargos):
     grid = [[None for _ in range(12)] for _ in range(9)]
 

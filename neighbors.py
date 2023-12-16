@@ -64,6 +64,8 @@ def move_block(ship, block_list, arm_loc, sel_loc, mov_loc, exit):
     new_ship[mov_loc[0]][mov_loc[1]] = new_ship[sel_loc[0]][sel_loc[1]]
     new_ship[sel_loc[0]][sel_loc[1]] = 0
     new_block_list = [i for i in block_list if i != sel_loc]
+    new_block_list = [i for i in block_list if i != sel_loc]
+
     new_arm_loc = mov_loc
     if arm_loc == "truck":
         cost = 2 + man_dis(exit, sel_loc) + point_dis(sel_loc, mov_loc, ship)
@@ -86,6 +88,14 @@ def onload(ship, onload_list, arm_loc, mov_loc, exit):
         cost = man_dis(arm_loc, exit) + 4 + man_dis(exit, mov_loc)
     return new_ship, new_onload_list, new_arm_loc, cost
 
+def block_list_renew(target_list, block_list, mov_loc):
+    target_ys = set(y for _, y in target_list)
+    if mov_loc[1] in target_ys:
+        new_block_list = block_list + [mov_loc]
+    else:
+        new_block_list = block_list
+    return new_block_list
+
 def goal_reached(target_list, onload_list):
     return len(target_list) == 0 and len(onload_list) == 0
 
@@ -107,10 +117,11 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
                             mov_loc = (x,y)
         
         new_ship, new_onload_list, new_arm_loc, cost = onload(ship, onload_list, arm_loc, mov_loc, exit)
+        new_block_list = block_list_renew(target_list, block_list, mov_loc)
 
-        new_h = heuristic(target_list, block_list, exit)
+        new_h = heuristic(target_list, new_block_list, exit)
         
-        new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, "truck", mov_loc, cost, current_node, cost, new_h)
+        new_node = Node(new_ship, target_list, new_block_list, new_onload_list, new_arm_loc, "truck", mov_loc, cost, current_node, cost, new_h)
         neighbors.append(new_node)
     
     
@@ -129,10 +140,11 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
                                 min_distance = distance
                                 mov_loc = (x,y)
             new_ship, new_onload_list, new_arm_loc, cost = onload(ship, onload_list, arm_loc, mov_loc, exit)
+            new_block_list = block_list_renew(target_list, block_list, mov_loc)
 
-            new_h = heuristic(target_list, block_list, exit)
+            new_h = heuristic(target_list, new_block_list, exit)
         
-            new_node = Node(new_ship, target_list, block_list, new_onload_list, new_arm_loc, "truck", mov_loc, cost, current_node, cost, new_h)
+            new_node = Node(new_ship, target_list, new_block_list, new_onload_list, new_arm_loc, "truck", mov_loc, cost, current_node, cost, new_h)
             neighbors.append(new_node)
         
 
@@ -177,6 +189,7 @@ def get_neighbors(current_node, ship, target_list, block_list, onload_list, arm_
                                     mov_loc = (x,y)
 
                 new_ship, new_block_list, new_arm_loc, cost = move_block(ship, block_list, arm_loc, sel_loc, mov_loc, exit)
+                new_block_list = block_list_renew(target_list, new_block_list, mov_loc)
 
                 new_h = heuristic(target_list,new_block_list,exit)
                 

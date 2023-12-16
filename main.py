@@ -5,6 +5,8 @@ from neighbors import Node
 from neighbors import get_neighbors
 from neighbors import goal_reached
 import json
+from manifest_import import Cargo
+import os
 
 def find_block_list(array, target_list):
     min_i = min(i for i, _ in target_list)
@@ -31,7 +33,7 @@ initial_target_list = [(1,4)]
 
 #get block list
 initial_block_list = find_block_list(initial_ship, initial_target_list)
-print(initial_block_list)
+
 
 #user input onload cargos
 initial_onload_list = ["ONLOAD"]
@@ -47,12 +49,14 @@ start_node = Node(initial_ship, initial_target_list, initial_block_list, initial
 
 path = a_star(start_node, goal_reached, get_neighbors)
 
+
 for node in path:
     for row in reversed(node.ship):
-        print(" ".join(str(item) for item in row))
+        print("   ".join(str(item) for item in row))
     print("Arm:", node.arm_loc)
     print("Move cargo from: ", node.sel_loc, "to ", node.mov_loc, ",cost: ", node.cost, "minutes.")
     print("-" * 20)  
+
 
 
 
@@ -79,3 +83,4 @@ def path_to_json(path):
         json.dump(output, file, indent=4)
 
 path_to_json(path)
+
