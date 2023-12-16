@@ -38,6 +38,9 @@ initial_block_list = find_block_list(initial_ship, initial_target_list)
 #user input onload cargos
 initial_onload_list = ["ONLOAD"]
 
+#user input weight for onload cargos
+weight_list = [100]
+
 #initial arm location, should not change
 initial_arm_loc = (8,0)
 
@@ -56,10 +59,30 @@ for node in path:
     print("Arm:", node.arm_loc)
     print("Move cargo from: ", node.sel_loc, "to ", node.mov_loc, ",cost: ", node.cost, "minutes.")
     print("-" * 20)  
-
-
-
-
+    if node.sel_loc == "truck":
+        for i in cargos:
+            if i.position == node.mov_loc:
+               i.name = node.ship[node.mov_loc[0]][node.mov_loc[1]]
+               i.weight = weight_list[0]
+               weight_list = weight_list[1:]
+    elif node.mov_loc == "truck":
+        for i in cargos:
+            if i.position == node.sel_loc:
+                i.name = "UNUSED"
+                i.weight = 0
+    else:
+        for i in cargos:
+            if i.position == node.mov_loc:
+                i.name = node.ship[node.mov_loc[0]][node.mov_loc[1]]
+                for j in cargos:
+                    if j.position == node.sel_loc:
+                        move_weight = j.weight
+                i.weight = move_weight
+            elif i.position == node.sel_loc:
+                i.name = "UNUSED"
+                i.weight = 0
+               
+# Write to JSON
 def path_to_json(path):
     steps = []
     for i, node in enumerate(path[1:], start=1):
@@ -84,3 +107,15 @@ def path_to_json(path):
 
 path_to_json(path)
 
+# Output new_manifest
+def write_cargo_info_to_file(cargos, file_path):
+    with open(file_path, 'w') as file:
+        for cargo in cargos:
+            position = f"({cargo.position[0]+1},{cargo.position[1]+1})"
+            weight = f"{{{cargo.weight}}}"
+            name = cargo.name
+            line = f"{position}, {weight}, {name}\n"
+            file.write(line)
+
+output_file_path = 'updated_manifest.txt'
+write_cargo_info_to_file(cargos, output_file_path)
