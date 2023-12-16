@@ -5,8 +5,6 @@ from neighbors import Node
 from neighbors import get_neighbors
 from neighbors import goal_reached
 import json
-from manifest_import import Cargo
-import os
 
 def find_block_list(array, target_list):
     min_i = min(i for i, _ in target_list)
@@ -32,7 +30,9 @@ initial_ship = grid
 initial_target_list = [(1,4)]
 
 #get block list
-initial_block_list = find_block_list(initial_ship, initial_target_list)
+block_list = find_block_list(initial_ship, initial_target_list)
+initial_block_list = block_list
+
 
 
 #user input onload cargos
