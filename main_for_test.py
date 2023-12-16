@@ -19,7 +19,7 @@ def find_block_list(array, target_list):
     return block_list
 
 
-manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase5.txt"
+manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase2.txt"
 
 # write cargo information to grid
 cargos = parse_cargo_info( manifest_path )
@@ -27,7 +27,7 @@ grid = fill_grid_with_cargos(cargos)
 initial_ship = grid
 
 #user input targets
-initial_target_list = [(0,1),(0,5)]
+initial_target_list = [(1,1)]
 
 #get block list
 block_list = find_block_list(initial_ship, initial_target_list)
@@ -106,7 +106,7 @@ def path_to_json(path):
     }
 
     # write to json
-    with open('output.json', 'w') as file:
+    with open('test_output.json', 'w') as file:
         json.dump(output, file, indent=4)
 
 path_to_json(path)
