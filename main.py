@@ -10,18 +10,19 @@ username = None
 json_data = None
 step_info_label = None
 step_details_label = None
-target_list = None
-onload_list = None
-cargos_weight = None
+target_list = []
+onload_list = []
+cargos_weight = []
+file_path = ""
 
 
 # Function to read and parse JSON data
 def read_json_data():
     try:
-        with open('output_load.json', 'r') as file:
+        with open('output.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
-        print("JSON file not found.")
+        messagebox.showerror("JSON Error", "JSON File Not Found")
 
 
 # Get the path to the desktop directory
@@ -73,7 +74,7 @@ def update_username():
 
 # Read load manifest
 def load_window():
-    save_to_log("Need to Load/Offload")
+    global file_path
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     if file_path:
         try:
@@ -83,9 +84,7 @@ def load_window():
                 file_name = os.path.basename(file_path)  # Extracting only the file name
                 save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
         except FileNotFoundError:
-            print("File not found")
-        except Exception as e:
-            print("An error occurred:", e)
+            messagebox.showerror("File error", "File Not Found")
 
 
 # Display load manifest
@@ -95,15 +94,6 @@ def display_load(lines):
     main_frame = tk.Frame(the_load_window)
     main_frame.pack(side=tk.RIGHT, padx=50, pady=50)
     root.withdraw()  # close main window
-
-    # Create a frame for the 1x1 grid trunk
-    truck_grid_frame = tk.Frame(main_frame)
-    truck_grid_frame.pack(side=tk.LEFT)
-
-    # Create a button for the 1x1 grid cell
-    truck_btn = tk.Button(truck_grid_frame, text="", borderwidth=2, relief="solid", width=8, height=2,
-                          state=tk.DISABLED)
-    truck_btn.pack()
 
     # Frame for the content display area on the left
     left_frame = tk.Frame(the_load_window)
@@ -125,6 +115,8 @@ def display_load(lines):
     def update_content_display(content):
         # Update the label with the clicked cell content
         cell_info_label.config(text=f"Container Name is: {content}")
+        log_offload = f"Container: {content} has been off the Ship"
+        save_to_log(log_offload)
 
     # Buttons for content display manipulation
     clear_button = tk.Button(left_frame, text="Clear", command=lambda: update_content_display(""))
@@ -132,95 +124,146 @@ def display_load(lines):
 
     buttons_dict = {}  # Dictionary to keep track of buttons
 
-    json_data = read_json_data()
-    if json_data is None:
-        messagebox.showerror("Error", "Failed to load JSON data.")
-        return
-
-    # Initialize step-related variables and labels
-    current_step = 0
-    step_info_label = tk.Label(left_frame, font=("Arial", 16))
-    step_info_label.pack(pady=5)
-    step_details_label = tk.Label(left_frame, font=("Arial", 14))
-    step_details_label.pack(pady=5)
-
-    # Function to update the step display
-    def update_step_display():
-        nonlocal current_step
-        total_steps = len(json_data["steps"])
-
-        if current_step < total_steps:
-            step_data = json_data['steps'][current_step]
-            target = "Truck" if step_data['target'] is None else str(step_data['target'])
-            dest = "Truck" if step_data['dest'] is None else str(step_data['dest'])
-            cost = step_data['cost']
-
-            step_info_label.config(text=f"Step {current_step + 1} of {total_steps}")
-            step_details_label.config(text=f"Start: {target} -> Dest: {dest} \n Current Time: {cost}")
-
-            current_step += 1
-        else:
-            back_button.pack(side=tk.TOP, pady=5)
-
-    update_step_display()
-
-    # Displaying total time
-    total_time = json_data["totalTime"]
-    total_time_label = tk.Label(left_frame, text=f"Total Time: {total_time}", font=("Arial", 14))
-    total_time_label.pack(pady=5)
-
-    # Next button to update the step display
-    next_button = tk.Button(left_frame, text="Next", command=update_step_display)
-    next_button.pack(pady=5)
-
     # function to toggle cell color between light green and light blue
     def change_cell_color(event, btn, coords):
-        global target_list
         current_color = btn.cget('bg')
         if current_color == 'light green':
             btn.config(bg='light blue')
 
-            print(f"Clicked on cell at coordinates: {coords}")
+            target_list.append(coords)
 
         elif current_color == 'light blue':
             btn.config(bg='light green')
 
-    def confirm_description_and_weight():
-        global onload_list, cargos_weight
-        description = description_entry.get().strip()  # Keep the original case
-        disallowed_exact_words = ["NAN", "UNUSED"]
+    # Function to add a description and weight
+    def add_description_and_weight():
+        description = description_entry.get().strip()
+        weight = weight_entry.get().strip()
 
+        if validate_description(description) and validate_weight(weight):
+            # Append the description and weight to their respective lists
+            onload_list.append(description)
+            cargos_weight.append(weight)
+
+            # Clear the description and weight Entry fields
+            description_entry.delete(0, tk.END)
+            weight_entry.delete(0, tk.END)
+
+            log_message = f"Added description: {description}, weight: {weight} has been added to the ship"
+            save_to_log(log_message)
+        else:
+            messagebox.showerror("Validation Check", "Invalid description or weight.")
+
+    def send_info_to_onload_offload_algorithm():
+        global file_path
+
+        if len(target_list) >= 1 and len(onload_list) >= 1 and len(cargos_weight) >= 1:
+            # Call onload_offload_algorithm with individual arguments
+            onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
+
+            json_data = read_json_data()
+            if json_data is None:
+                messagebox.showerror("Error", "Failed to load JSON data.")
+                return
+
+            # Initialize step-related variables and labels
+            current_step = 0
+            step_info_label = tk.Label(left_frame, font=("Arial", 16))
+            step_info_label.pack(pady=5)
+            step_details_label = tk.Label(left_frame, font=("Arial", 14))
+            step_details_label.pack(pady=5)
+
+            def update_grid(target, dest):
+                for coords, btn in buttons_dict.items():
+                    if btn.cget('bg') in ['red', 'purple']:
+                        btn.config(bg='light green' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace',
+                                   text="")
+
+                if target:
+                    target_coords = (target[0] - 1, 13 - target[1])
+                    if target_coords in buttons_dict and buttons_dict[target_coords].cget('bg') != 'grey':
+                        buttons_dict[target_coords].config(bg='red')
+
+                if dest:
+                    dest_coords = (dest[0] - 1, 13 - dest[1])
+                    if dest_coords in buttons_dict and buttons_dict[dest_coords].cget('bg') != 'grey':
+                        buttons_dict[dest_coords].config(bg='purple')
+
+            # Function to update the step display
+            def update_step_display():
+                nonlocal current_step
+                total_steps = len(json_data["steps"])
+
+                if current_step < total_steps:
+                    step_data = json_data['steps'][current_step]
+                    target = step_data.get('target')
+                    dest = step_data.get('dest')
+
+                    update_grid(target, dest)
+
+                if current_step < total_steps:
+                    step_data = json_data['steps'][current_step]
+                    target = "Truck" if step_data['target'] is None else str(step_data['target'])
+                    dest = "Truck" if step_data['dest'] is None else str(step_data['dest'])
+                    cost = step_data['cost']
+
+                    step_info_label.config(text=f"Step {current_step + 1} of {total_steps}")
+                    step_details_label.config(text=f"Start: {target} -> Dest: {dest} \n Current Time: {cost}")
+
+                    current_step += 1
+                else:
+                    back_button.pack(side=tk.TOP, pady=5)
+
+            update_step_display()
+
+            # Displaying total time
+            total_time = json_data["totalTime"]
+            total_time_label = tk.Label(left_frame, text=f"Total Time: {total_time}", font=("Arial", 14))
+            total_time_label.pack(pady=5)
+
+            # Next button to update the step display
+            next_button = tk.Button(left_frame, text="Next", command=update_step_display)
+            next_button.pack(pady=5)
+
+        else:
+            messagebox.showerror("Validation Check",
+                                 "Please input at least 1 container, descriptions, and weights.")
+
+    # Define a function to validate the description
+    def validate_description(description):
+        disallowed_exact_words = ["NAN", "UNUSED"]
         if description in disallowed_exact_words or not description:
             messagebox.showerror("Validation Check", "Invalid description.")
-            return  # Stop further validation if the description is invalid
+            return False
+        return True
 
-        weight = weight_entry.get()
+    # Define a function to validate the weight
+    def validate_weight(weight):
         if weight.isdigit():
             weight_value = int(weight)
-            if 1 <= weight_value <= 999999:
+            if 0 <= weight_value <= 99999:
+                return True
+        messagebox.showerror("Validation Check", "Invalid weight.")
+        return False
 
-                # Both description and weight are valid
-                messagebox.showinfo("Validation Check", "Valid description and weight.")
-                # Log the valid description and weight
-                log_message = f"Description: {description}, Weight: {weight} has been added to the ship"
-                save_to_log(log_message)
-            else:
-                messagebox.showerror("Validation Check", "Invalid weight.")
-
-    # Label and Entry for Description
+    # Create Entry fields for Description and Weight
     description_label = tk.Label(the_load_window, text="Description:")
     description_label.pack(pady=5)
     description_entry = tk.Entry(the_load_window)
     description_entry.pack(pady=5)
 
-    # Label and Entry for Weight
     weight_label = tk.Label(the_load_window, text="Weight:")
     weight_label.pack(pady=5)
     weight_entry = tk.Entry(the_load_window)
     weight_entry.pack(pady=5)
 
-    confirm_button = tk.Button(the_load_window, text="Add", command=confirm_description_and_weight)
-    confirm_button.pack(pady=5)
+    # Create buttons for adding Description and Weight, and sending all information
+    add_info_button = tk.Button(the_load_window, text="Add Description & Weight", command=add_description_and_weight)
+    add_info_button.pack(pady=5)
+
+    send_info_button = tk.Button(the_load_window, text="Start", height=3, width=10,
+                                 command=send_info_to_onload_offload_algorithm)
+    send_info_button.pack(pady=5)
 
     # disable copy and paste
     def disable_event(event):
@@ -290,7 +333,7 @@ def display_load(lines):
                                 bg="light green", command=lambda b=label_text: update_content_display(b))
                 btn.bind('<Button-1>', lambda event, button=btn, c=coords: change_cell_color(event, button, c))
             btn.grid(row=i, column=j)
-            buttons_dict[(i, j)] = btn  # Store buttons in dictionary
+            buttons_dict[(adjusted_i, adjusted_j)] = btn  # Store buttons in dictionary
 
     # Create the 4x24 grid for buffer
     buffer_grid_frame = tk.Frame(main_frame)
@@ -313,24 +356,19 @@ def display_load(lines):
 
 # Read balance manifest
 def balance_window():
+    global file_path
     save_to_log("Need to balance")
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     if file_path:
-        try:
-            if balance.run(file_path):
-                with open(file_path, 'r') as file:
-                    lines = file.readlines()
-                    display_balance(lines)
-                    file_name = os.path.basename(file_path)  # Extracting only the file name
-                    save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
-        except FileNotFoundError:
-            print("File not found")
-        except Exception as e:
-            print("An error occurred:", e)
+        if balance.run(file_path):
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+                display_balance(lines)
+                file_name = os.path.basename(file_path)  # Extracting only the file name
+                save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
 
-    if json_data is None:
-        print("Error reading JSON data")
-        exit()
+        else:
+            messagebox.showwarning("Balance", "Already Balanced")
 
 
 # Display balance manifest
@@ -464,7 +502,7 @@ def display_balance(lines):
         # Reset the previous Start and Dest colors if needed
         for coords, btn in buttons_dict.items():
             if btn.cget('bg') in ['red', 'purple']:
-                btn.config(bg='light green' if btn.cget('state') != tk.DISABLED else 'white', text="")
+                btn.config(bg='light green' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace', text="")
 
         # Highlight only the Start and Dest in the grid
         if start_coords in buttons_dict:
