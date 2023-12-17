@@ -27,11 +27,15 @@ grid = fill_grid_with_cargos(cargos)
 initial_ship = grid
 
 #user input targets
-initial_target_list = [(1,1)]
+initial_target_list = [(2,0)]
 
 #get block list
-block_list = find_block_list(initial_ship, initial_target_list)
-initial_block_list = block_list
+block_list = []
+if initial_target_list:
+    block_list = find_block_list(initial_ship, initial_target_list)
+    initial_block_list = block_list
+else:
+    initial_block_list = []
 print("Block cargos: ",block_list)
 
 
@@ -40,7 +44,7 @@ print("Block cargos: ",block_list)
 initial_onload_list = ["XXX","YYY"]
 
 #user input weight for onload cargos
-weight_list = [100, 200]
+weight_list = [100,200]
 
 #initial arm location, should not change
 initial_arm_loc = (8,0)

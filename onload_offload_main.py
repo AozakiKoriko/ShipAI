@@ -62,8 +62,12 @@ def onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
     initial_target_list = target_list
 
     #get block list
-    block_list = find_block_list(initial_ship, initial_target_list)
-    initial_block_list = block_list
+    block_list = []
+    if initial_target_list:
+        block_list = find_block_list(initial_ship, initial_target_list)
+        initial_block_list = block_list
+    else:
+        initial_block_list = []
 
     #user input onload cargos
     initial_onload_list = onload_list
@@ -116,11 +120,10 @@ def onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
     return True 
 
 # Function test
-"""
+
 manifest_path = "/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase2.txt"
-initial_target_list = [(1,1)]
+initial_target_list = [(2,0)]
 initial_onload_list = ["XXX","YYY"]
 weight_list = [100, 200]
 
 onload_offload_algorithm(manifest_path, initial_target_list, initial_onload_list, weight_list)
-"""
