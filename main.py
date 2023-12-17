@@ -166,13 +166,13 @@ def display_load(lines):
             current_step = 0
             step_info_label = tk.Label(left_frame, font=("Arial", 16))
             step_info_label.pack(pady=5)
-            step_details_label = tk.Label(left_frame, font=("Arial", 14))
+            step_details_label = tk.Label(left_frame, font=("Arial", 18))
             step_details_label.pack(pady=5)
 
             def update_grid(target, dest):
                 for coords, btn in buttons_dict.items():
                     if btn.cget('bg') in ['red', 'purple']:
-                        btn.config(bg='SystemButtonFace' if btn.cget('state') != tk.DISABLED else 'light green',
+                        btn.config(bg='SystemButtonFace' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace',
                                    text="")
 
                 if target:
@@ -206,6 +206,9 @@ def display_load(lines):
 
                     current_step += 1
                 else:
+                    step_info_label.pack_forget()
+                    step_details_label.pack_forget()
+                    total_time_label.pack_forget()
                     next_button.pack_forget()
                     back_button.pack(side=tk.TOP, pady=5)
 
@@ -219,10 +222,12 @@ def display_load(lines):
             # Next button to update the step display
             next_button = tk.Button(left_frame, text="Next", command=update_step_display)
             next_button.pack(pady=5)
+            return True
 
         else:
             messagebox.showerror("Validation Check",
                                  "Please input at least 1 container or 1 description with weight.")
+            return False
 
     # Define a function to validate the description
     def validate_description(description):
@@ -244,9 +249,9 @@ def display_load(lines):
     def on_button_click():
         # Disable the button
         send_info_button.config(state=tk.DISABLED)
-
-        # Call the original function
-        send_info_to_onload_offload_algorithm()
+        success = send_info_to_onload_offload_algorithm()
+        if not success:
+            send_info_button.config(state=tk.NORMAL)
 
     # Create Entry fields for Description and Weight
     description_label = tk.Label(the_load_window, text="Description:")
@@ -401,7 +406,7 @@ def display_balance(lines):
     # Initialize labels for displaying current step and details
     step_info_label = tk.Label(left_frame, font=("Arial", 16))
     step_info_label.pack(pady=5)
-    step_details_label = tk.Label(left_frame, font=("Arial", 14))
+    step_details_label = tk.Label(left_frame, font=("Arial", 18))
     step_details_label.pack(pady=5)
 
     # Set the labels with the first step's data
@@ -415,13 +420,15 @@ def display_balance(lines):
         text=f"Start: {first_start_coords} -> Dest: {first_dest_coords} \n Current time: {first_step_time}")
 
     def update_step_display():
-        global current_step, step_info_label, step_details_label
+        global current_step
         total_steps = len(json_data["steps"])
 
         if current_step < total_steps:
             current_step += 1
         else:
-            # current_step = 1  # back to the first step
+            step_info_label.pack_forget()
+            step_details_label.pack_forget()
+            total_time_label.pack_forget()
             next_button.pack_forget()
             back_button.pack(side=tk.TOP, pady=5)
 
