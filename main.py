@@ -115,7 +115,7 @@ def display_load(lines):
     def update_content_display(content):
         # Update the label with the clicked cell content
         cell_info_label.config(text=f"Container Name is: {content}")
-        log_offload = f"Container: {content} offload"
+        log_offload = f"Container of {content} offload"
         save_to_log(log_offload)
 
     # Buttons for content display manipulation
@@ -153,7 +153,7 @@ def display_load(lines):
             save_to_log(log_message)
 
     def send_info_to_onload_offload_algorithm():
-        global file_path, send_info_button
+        global file_path
         if len(target_list) >= 1 or len(onload_list) >= 1 and len(cargos_weight) >= 1:
             onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
 
@@ -211,6 +211,7 @@ def display_load(lines):
                     total_time_label.pack_forget()
                     next_button.pack_forget()
                     back_button.pack(side=tk.TOP, pady=5)
+                    os.remove('output.json')
 
             update_step_display()
 
@@ -431,6 +432,7 @@ def display_balance(lines):
             total_time_label.pack_forget()
             next_button.pack_forget()
             back_button.pack(side=tk.TOP, pady=5)
+            os.remove('output.json')
 
         step_data = json_data['steps'][current_step - 1]
         start_coords = tuple(map(int, step_data['start']))
