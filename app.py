@@ -5,6 +5,7 @@ from manifest_import import parse_cargo_info
 from grid_creator import fill_grid_with_cargos
 from onload_offload_main import onload_offload_algorithm
 import json
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -16,10 +17,47 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+LOG_FOLDER = os.path.join(BASE_DIR, 'log')
+app.config['LOG_FOLDER'] = LOG_FOLDER
+
+def log_action(action):
+    try:
+        current_time = datetime.now().strftime("%B %d %Y: %H:%M")
+        log_message = f"{current_time} {action}\n"
+
+        log_file_path = os.path.join(app.config['LOG_FOLDER'], 'log.txt')
+        with open(log_file_path, 'a') as file:
+            file.write(log_message)
+    except Exception as e:
+        print(f"Error writing to log file: {e}")
 
 @app.route('/')
 def index():
     return render_template('main_page.html')  
+
+@app.route('/report', methods=['POST'])
+def report():
+    data = request.json
+    report = data.get('report', '')
+    log_action(f"\"{report}\"")
+    return jsonify({"status": "success", "message": "Report received."})
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username', 'Unknown')
+    log_action(f"{username} signs in")
+    return jsonify({"status": "success", "message": f"Logged in as {username}"})
+
+@app.route('/complete-action', methods=['POST'])
+def complete_action():
+    filename = session.get('filename', None)
+    if filename:
+        log_action(f"Finished a Cycle. Manifest {filename} was updated, and a reminder pop-up to operator to send file was displayed")
+    print("Complete action triggered")
+    return jsonify({"status": "success", "message": "Action completed successfully"})
+
 
 @app.route('/submit-target-list', methods=['POST'])
 def submit_target_list():
@@ -87,6 +125,9 @@ def onload_offload():
         grid = fill_grid_with_cargos(cargos)
         session['grid'] = grid
         session['filepath'] = filepath
+        session['filename'] = filename
+        string_count = sum(isinstance(item, str) for row in grid for item in row)
+        log_action(f"{filename} is opened, there are {string_count} containers on the ship")
         return redirect(url_for('offload_page'))
 
 

@@ -31,6 +31,59 @@
         .file-input {
             display: none;
         }
+
+        #loginButton {
+            position: fixed;
+            left: 10px;
+            bottom: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+        }
+
+        #reportButton {
+            position: fixed;
+            left: 10px;
+            bottom: 50px; /* 调整这个值以放置按钮 */
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+        }
+
     </style>
 </head>
 <body>
@@ -42,9 +95,47 @@
         
         <input type="file" id="balance-file" class="file-input" onchange="uploadFile('balance')">
         <button class="button" onclick="document.getElementById('balance-file').click()">Balance</button>
+<!-----------------------------Login and Report logic ------------------------->
+        <button id="reportButton">Report</button>
+
+        <div id="reportModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <form id="reportForm">
+                    <label for="reportText">Report:</label><br>
+                    <textarea id="reportText" name="reportText" rows="5"></textarea><br><br>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+        </div>
+
+        <button id="loginButton">Login</button>
+
+        <div id="loginModal" class="modal" style="display:none;">
+
+            <div class="modal-content">
+                <form id="loginForm">
+                    <label for="username">Name:</label><br>
+                    <input type="text" id="username" name="username"><br><br>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+        </div>
+<!----------------------------------------------------------------------------->
     </div>
 
     <script>
+        var modal = document.getElementById("loginModal");
+        var btn = document.getElementById("loginButton");
+        var reportModal = document.getElementById("reportModal");
+        var reportBtn = document.getElementById("reportButton");
+
+        reportBtn.onclick = function() {
+            reportModal.style.display = "block";
+        }
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
         function uploadFile(action) {
             var fileInput = document.getElementById('onload-offload-file');
             var file = fileInput.files[0];
@@ -57,7 +148,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.href = '/offload-page'; // 页面跳转
+                    window.location.href = '/offload-page'; 
                 } else {
                     throw new Error('Upload failed');
                 }
@@ -66,6 +157,50 @@
                 console.error('Error:', error);
             });
         }
+
+//-----------------------------Login and Report logic -------------------------
+        document.getElementById("loginForm").onsubmit = function(event) {
+            event.preventDefault();
+            var username = document.getElementById("username").value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Login response:', data);
+                modal.style.display = "none";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        };
+
+        document.getElementById("reportForm").onsubmit = function(event) {
+            event.preventDefault();
+            var reportText = document.getElementById("reportText").value;
+
+            fetch('/report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ report: reportText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Report response:', data);
+                reportModal.style.display = "none";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        };
+//-----------------------------------------------------------------------------
     </script>
 </body>
 </html>
