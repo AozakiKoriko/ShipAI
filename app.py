@@ -99,6 +99,10 @@ def get_grid():
 def step_page():
     return render_template('step_page.html')
 
+@app.route('/balance-process-page')
+def balance_process_page():
+    return render_template('balance_process_page.html')
+
 @app.route('/process-page')
 def process_page():
     return render_template('process_page.html')
@@ -144,12 +148,15 @@ def balance():
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
-
+        
         cargos = parse_cargo_info(filepath)
         grid = fill_grid_with_cargos(cargos)
         session['grid'] = grid
+        string_count = sum(isinstance(item, str) for row in grid for item in row)
+        log_action(f"{filename} is opened, there are {string_count} containers on the ship") 
         run(filepath)
-        return redirect(url_for('step_page'))
+        return redirect(url_for('balance_process_page'))
+
 
 
 if __name__ == '__main__':

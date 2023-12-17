@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>ShipAI</title>
+    <title>Simple Page</title>
     <style>
         body, html {
             height: 100%;
@@ -17,19 +16,15 @@
             text-align: center;
         }
 
-        .title {
-            font-size: 2em;
+        .prompt-text {
+            font-size: 24px;
             margin-bottom: 20px;
         }
 
-        .button {
-            margin: 10px;
+        #nextButton {
             padding: 10px 20px;
-            font-size: 1em;
-        }
-
-        .file-input {
-            display: none;
+            font-size: 16px;
+            cursor: pointer;
         }
 
         #loginButton {
@@ -83,26 +78,12 @@
             border: 1px solid #888;
             width: 30%;
         }
-
-        #reloadButton {
-            position: fixed;
-            left: 10px;
-            bottom: 90px; /* 调整这个值以放置按钮 */
-        }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title">ShipAI</div>
-
-        <input type="file" id="onload-offload-file" class="file-input" onchange="uploadOnloadOffload()">
-        <button class="button" onclick="document.getElementById('onload-offload-file').click()">Onload/Offload</button>
-
-        <input type="file" id="balance-file" class="file-input" onchange="uploadBalance()">
-        <button class="button" onclick="document.getElementById('balance-file').click()">Balance</button>
-
-<!-----------------------------Login and Report logic ------------------------->
+        <p class="prompt-text">Steps has been generated, click Next when you ready</p>
+        <button id="nextButton">Next</button>
         <button id="reportButton">Report</button>
 
         <div id="reportModal" class="modal" style="display:none;">
@@ -114,11 +95,11 @@
                 </form>
             </div>
         </div>
-
+    
         <button id="loginButton">Login</button>
-
+    
         <div id="loginModal" class="modal" style="display:none;">
-
+    
             <div class="modal-content">
                 <form id="loginForm">
                     <label for="username">Name:</label><br>
@@ -126,69 +107,23 @@
                     <input type="submit" value="Submit">
                 </form>
             </div>
-        </div>
-<!----------------------------------------------------------------------------->
-    <button id="reloadButton">Reload</button>
+        </div> 
     </div>
-
     <script>
-        var modal = document.getElementById("loginModal");
-        var btn = document.getElementById("loginButton");
-        var reportModal = document.getElementById("reportModal");
-        var reportBtn = document.getElementById("reportButton");
-
-        reportBtn.onclick = function() {
-            reportModal.style.display = "block";
-        }
-
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-        function uploadOnloadOffload() {
-        var fileInput = document.getElementById('onload-offload-file');
-        var file = fileInput.files[0];
-        var formData = new FormData();
-        formData.append('file', file);
-
-        fetch('/onload-offload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.href = '/offload-page'; 
-            } else {
-                throw new Error('Upload failed');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+        document.getElementById('nextButton').addEventListener('click', function() {
+            window.location.href = '/step-page';
         });
-    }
+        var loginModal = document.getElementById("loginModal");
+        var reportModal = document.getElementById("reportModal");
 
-    function uploadBalance() {
-    var fileInput = document.getElementById('balance-file');
-    var file = fileInput.files[0];
-    var formData = new FormData();
-    formData.append('file', file);
+        loginButton.onclick = function() {
+    loginModal.style.display = "block";
+};
 
-    fetch('/balance', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) {
-            window.location.href = '/balance-process-page';
-        } else {
-            throw new Error('Upload failed');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-} 
+reportButton.onclick = function() {
+    reportModal.style.display = "block";
+};
 
-//-----------------------------Login and Report logic -------------------------
         document.getElementById("loginForm").onsubmit = function(event) {
             event.preventDefault();
             var username = document.getElementById("username").value;
@@ -208,6 +143,7 @@
             .catch(error => {
                 console.error('Error:', error);
             });
+            loginModal.style.display = "none";
         };
 
         document.getElementById("reportForm").onsubmit = function(event) {
@@ -229,12 +165,8 @@
             .catch(error => {
                 console.error('Error:', error);
             });
+            reportModal.style.display = "none";
         };
-//-----------------------------------------------------------------------------
-        document.getElementById("reloadButton").onclick = function() {
-            window.location.href = '/step-page'; // 将 'your-target-page' 替换为您的目标 URL
-        };
-
     </script>
 </body>
 </html>
