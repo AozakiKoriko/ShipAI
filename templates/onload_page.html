@@ -40,7 +40,7 @@
 </head>
 <body>
     <div class="container">
-        <p class="prompt-text">Please enter onload's name and weight, and click next when you are ready.</p>
+        <p class="prompt-text">Please enter onload's name and weight, and click Next when you ready</p>
         <div class="input-group">
             <input type="text" id="name" placeholder="Name">
             <input type="text" id="weight" placeholder="Weight">
@@ -50,5 +50,60 @@
             <button id="nextButton">Next</button>
         </div>
     </div>
+    <script>
+        let onload_list = [];
+        let weight_list = [];
+
+        function isValidName(name) {
+            const trimmedName = name.trim();
+            const forbiddenPatterns = [/^NAN$/, /^UNUSED$/, /.*NAN.*$/, /.*UNUSED.*$/];
+
+            if (trimmedName === '' || forbiddenPatterns.some(pattern => pattern.test(trimmedName))) {
+                return false;
+            }
+            return true;
+        }
+
+        function isValidWeight(weight) {
+            return !isNaN(weight) && weight >= 0 && weight <= 99999;
+        }
+
+
+    
+        document.getElementById('addButton').addEventListener('click', function() {
+            const name = document.getElementById('name').value;
+            let weight = document.getElementById('weight').value;
+
+            weight = parseFloat(weight);
+    
+            if (isValidName(name) && isValidWeight(weight)){
+                onload_list.push(name);
+                weight_list.push(weight);
+                console.log('Onload List:', onload_list);
+                console.log('Weight List:', weight_list);
+    
+                document.getElementById('name').value = '';
+                document.getElementById('weight').value = '';
+            }else{
+                alert('Please enter a valid name (not "NAN" or "UNUSED") and a weight between 0 and 99999.');
+            }        
+        });
+    
+        document.getElementById('nextButton').addEventListener('click', function() {
+            fetch('/submit-onload-list', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ onloadList: onload_list, weightList: weight_list })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                window.location.href = '/process-page';
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>    
 </body>
 </html>

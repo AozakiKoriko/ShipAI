@@ -5,6 +5,16 @@ from neighbors import Node
 from neighbors import get_neighbors
 from neighbors import goal_reached
 import json
+import os
+from flask import Flask
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'sdssds5057')
+
+# setting upload path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def find_block_list(array, target_list):
     min_i = min(i for i, _ in target_list)
@@ -18,7 +28,7 @@ def find_block_list(array, target_list):
                     block_list.append((i, j))
     return block_list
 
-def path_to_json(path, total_cost):
+def path_to_json(path, total_cost,upload_folder):
     steps = []
     for i, node in enumerate(path[1:], start=1):
         step = {
@@ -38,7 +48,8 @@ def path_to_json(path, total_cost):
     }
 
     # write to json
-    with open('output.json', 'w') as file:
+    output_file_path = os.path.join(upload_folder, 'output.json')
+    with open(output_file_path, 'w') as file:
         json.dump(output, file, indent=4)
 
 # Output new_manifest
@@ -112,7 +123,7 @@ def onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
                     i.name = "UNUSED"
                     i.weight = 0
     # Write to json
-    path_to_json(path,total_cost)
+    path_to_json(path,total_cost, app.config['UPLOAD_FOLDER'])
 
     output_file_path = 'updated_manifest.txt'
     write_cargo_info_to_file(cargos, output_file_path)

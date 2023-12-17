@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Page</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .prompt-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #nextButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="prompt-text">Steps has been generated, click Next when you ready</p>
+        <button id="nextButton">Next</button>
+    </div>
+    <script>
+        document.getElementById('nextButton').addEventListener('click', function() {
+            window.location.href = '/step-page';
+        });
+    </script>
+</body>
+</html>

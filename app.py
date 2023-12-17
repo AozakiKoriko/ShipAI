@@ -3,6 +3,8 @@ import os
 from werkzeug.utils import secure_filename
 from manifest_import import parse_cargo_info
 from grid_creator import fill_grid_with_cargos
+from onload_offload_main import onload_offload_algorithm
+import json
 
 
 app = Flask(__name__)
@@ -24,12 +26,42 @@ def submit_target_list():
     data = request.get_json()
     target_list = [tuple(item) for item in data.get('targetList', [])]
     print("Received target_list: ",target_list)
+    session['target_list'] = target_list
     return jsonify({"status": "success"})
+
+@app.route('/submit-onload-list', methods=['POST'])
+def submit_onload_list():
+    data = request.get_json()
+    onload_list = data.get('onloadList', [])
+    weight_list = data.get('weightList', [])
+    filepath = session.get('filepath')
+    print("Using filepath:",filepath)
+    target_list = session.get('target_list', [])
+    print("Using target_list: ",target_list)
+    onload_offload_algorithm(filepath, target_list, onload_list, weight_list) 
+    return jsonify({"status": "success"})
+
+@app.route('/get-steps')
+def get_steps():
+    try:
+        with open(os.path.join(app.config['UPLOAD_FOLDER'], 'output.json'), 'r') as file:
+            data = json.load(file)
+            return jsonify(data)
+    except IOError:
+        return jsonify({"error": "File not found"}), 404
 
 @app.route('/get-grid')
 def get_grid():
     grid = session.get('grid',[])
     return jsonify(grid)
+
+@app.route('/step-page')
+def step_page():
+    return render_template('step_page.html')
+
+@app.route('/process-page')
+def process_page():
+    return render_template('process_page.html')
 
 @app.route('/onload-page')
 def onload_page():
@@ -54,6 +86,7 @@ def onload_offload():
         cargos = parse_cargo_info(filepath)
         grid = fill_grid_with_cargos(cargos)
         session['grid'] = grid
+        session['filepath'] = filepath
         return redirect(url_for('offload_page'))
 
 

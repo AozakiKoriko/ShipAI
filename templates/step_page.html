@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Step Page</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            grid-gap: 10px;
+        }
+
+        .grid-item {
+            border: 1px solid black;
+            padding: 20px;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        @keyframes blueBlink {
+            50% { background-color: blue; }
+        }
+
+        @keyframes redBlink {
+            50% { background-color: red; }
+        }
+
+        .blue-blink {
+            animation: blueBlink 1s infinite;
+        }
+
+        .red-blink {
+            animation: redBlink 1s infinite;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        #nextButton {
+            display: block;
+            width: 150px;
+            height: 50px;
+            margin: 20px auto;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container" id="gridContainer">
+        <!-- 网格项将在这里生成 -->
+    </div>
+    <div class="instructions" id="instructionText">
+        <!-- 指令文本将显示在这里 -->
+    </div>
+    <button id="nextButton">Next</button>
+
+    <script>
+        let currentStepIndex = 0;
+        let stepsData = null;
+        let totalRemainingTime = 0;
+
+        async function fetchSteps() {
+            try {
+                const response = await fetch('/get-steps');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch steps data');
+                }
+                stepsData = await response.json();
+                totalRemainingTime = stepsData.totalTime;
+                updateInstructionText(currentStepIndex);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function updateInstructionText(index) {
+            if (!stepsData || !stepsData.steps || index >= stepsData.steps.length) {
+                return;
+            }
+
+            const step = stepsData.steps[index];
+            if (index > 0) { // 如果不是第一个步骤，减去前一个步骤的耗时
+                totalRemainingTime -= stepsData.steps[index - 1].cost;
+            }
+            const instruction = `Step ${step.No} of ${stepsData.steps.length}: Move container from ${step.targetLoc} ` +
+                                `${step.target ? `(${step.target.join(',')})` : ''} to ${step.destLoc} ` +
+                                `${step.dest ? `(${step.dest.join(',')})` : ''}, total time remain ${totalRemainingTime} minutes.`;
+            document.getElementById('instructionText').textContent = instruction;
+            updateGridDisplay(step);
+        }
+
+        function updateGridDisplay(step) {
+            // 清除所有网格的样式
+            const gridItems = document.querySelectorAll('.grid-item');
+            gridItems.forEach(item => {
+                item.classList.remove('blue-blink', 'red-blink');
+            });
+
+            // 如果 target 不是 null，则设置对应网格为蓝色闪烁
+            if (step.target) {
+                const targetItem = document.getElementById(`grid-item-${step.target[0]}-${step.target[1]}`);
+                targetItem.classList.add('blue-blink');
+            }
+
+            // 如果 dest 不是 null，则设置对应网格为红色闪烁
+            if (step.dest) {
+                const destItem = document.getElementById(`grid-item-${step.dest[0]}-${step.dest[1]}`);
+                destItem.classList.add('red-blink');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async (event) => {
+            const gridContainer = document.getElementById('gridContainer');
+
+            try {
+                const response = await fetch('/get-grid');
+                if (!response.ok) {
+                    throw new Error('Http error!');
+                }
+                const grid = await response.json();
+
+                for (let row = 7; row >= 0; row--) {
+                    for (let col = 0; col < 12; col++) {
+                        const gridItem = document.createElement('div');
+                        gridItem.id = `grid-item-${row}-${col}`;
+                        gridItem.classList.add('grid-item');
+                        if(grid[row][col] == '-1'){
+                            gridItem.style.backgroundColor = '#a0a0a0';
+                        }
+                        gridContainer.appendChild(gridItem);
+                    }
+                }
+            } catch (e) {
+                console.error('Could not load grid: ', e);
+            }
+
+            await fetchSteps();
+        });
+
+        document.getElementById('nextButton').addEventListener('click', function() {
+            currentStepIndex++;
+            updateInstructionText(currentStepIndex);
+        });
+    </script>
+</body>
+</html>
