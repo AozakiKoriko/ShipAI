@@ -155,7 +155,6 @@ def display_load(lines):
     def send_info_to_onload_offload_algorithm():
         global file_path, send_info_button
         if len(target_list) >= 1 or len(onload_list) >= 1 and len(cargos_weight) >= 1:
-            send_info_button.config(state=tk.DISABLED)
             onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
 
             json_data = read_json_data()
@@ -207,6 +206,7 @@ def display_load(lines):
 
                     current_step += 1
                 else:
+                    next_button.pack_forget()
                     back_button.pack(side=tk.TOP, pady=5)
 
             update_step_display()
@@ -241,6 +241,13 @@ def display_load(lines):
         messagebox.showerror("Validation Check", "Invalid weight. Enter a non-negative number")
         return False
 
+    def on_button_click():
+        # Disable the button
+        send_info_button.config(state=tk.DISABLED)
+
+        # Call the original function
+        send_info_to_onload_offload_algorithm()
+
     # Create Entry fields for Description and Weight
     description_label = tk.Label(the_load_window, text="Description:")
     description_label.pack(pady=5)
@@ -257,7 +264,7 @@ def display_load(lines):
     add_info_button.pack(pady=5)
 
     send_info_button = tk.Button(the_load_window, text="Start", height=2, width=10,
-                                 command=send_info_to_onload_offload_algorithm)
+                                 command=on_button_click)
     send_info_button.pack(pady=5)
 
     # disable copy and paste
@@ -415,6 +422,7 @@ def display_balance(lines):
             current_step += 1
         else:
             # current_step = 1  # back to the first step
+            next_button.pack_forget()
             back_button.pack(side=tk.TOP, pady=5)
 
         step_data = json_data['steps'][current_step - 1]
