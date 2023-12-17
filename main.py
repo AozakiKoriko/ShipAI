@@ -11,6 +11,8 @@ import datetime
 def check_string(s):
     if s.strip() == '':
         return False
+    if len(s) > 256:
+        return False
     pattern = r'^[\W_]*(NAN|UNUSED)[\W_]*$'
     return re.match(pattern, s) is None
 
