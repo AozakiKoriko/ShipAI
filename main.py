@@ -101,7 +101,7 @@ def display_load(lines):
 
     # Button to update the username
     update_username_button = tk.Button(left_frame, text="Hand Over", command=update_username)
-    update_username_button.pack(pady=5)
+    update_username_button.pack(side=tk.TOP, pady=5)
 
     # Button to go back to the main window
     back_button = tk.Button(left_frame, text="Load Done", width=12, height=3,
@@ -115,7 +115,7 @@ def display_load(lines):
     def update_content_display(content):
         # Update the label with the clicked cell content
         cell_info_label.config(text=f"Container Name is: {content}")
-        log_offload = f"Container: {content} has been off the Ship"
+        log_offload = f"Container: {content} offload"
         save_to_log(log_offload)
 
     # Buttons for content display manipulation
@@ -149,16 +149,13 @@ def display_load(lines):
             description_entry.delete(0, tk.END)
             weight_entry.delete(0, tk.END)
 
-            log_message = f"Added description: {description}, weight: {weight} has been added to the ship"
+            log_message = f"Container of description: {description}, weight: {weight} onload"
             save_to_log(log_message)
-        else:
-            messagebox.showerror("Validation Check", "Invalid description or weight.")
 
     def send_info_to_onload_offload_algorithm():
-        global file_path
-
-        if len(target_list) >= 1 and len(onload_list) >= 1 and len(cargos_weight) >= 1:
-            # Call onload_offload_algorithm with individual arguments
+        global file_path, send_info_button
+        if len(target_list) >= 1 or len(onload_list) >= 1 and len(cargos_weight) >= 1:
+            send_info_button.config(state=tk.DISABLED)
             onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
 
             json_data = read_json_data()
@@ -176,17 +173,17 @@ def display_load(lines):
             def update_grid(target, dest):
                 for coords, btn in buttons_dict.items():
                     if btn.cget('bg') in ['red', 'purple']:
-                        btn.config(bg='light green' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace',
+                        btn.config(bg='SystemButtonFace' if btn.cget('state') != tk.DISABLED else 'light green',
                                    text="")
 
                 if target:
-                    target_coords = (target[0] - 1, 13 - target[1])
-                    if target_coords in buttons_dict and buttons_dict[target_coords].cget('bg') != 'grey':
+                    target_coords = (target[0], target[1])
+                    if target_coords in buttons_dict:
                         buttons_dict[target_coords].config(bg='red')
 
                 if dest:
-                    dest_coords = (dest[0] - 1, 13 - dest[1])
-                    if dest_coords in buttons_dict and buttons_dict[dest_coords].cget('bg') != 'grey':
+                    dest_coords = (dest[0], dest[1])
+                    if dest_coords in buttons_dict:
                         buttons_dict[dest_coords].config(bg='purple')
 
             # Function to update the step display
@@ -201,10 +198,8 @@ def display_load(lines):
 
                     update_grid(target, dest)
 
-                if current_step < total_steps:
-                    step_data = json_data['steps'][current_step]
-                    target = "Truck" if step_data['target'] is None else str(step_data['target'])
-                    dest = "Truck" if step_data['dest'] is None else str(step_data['dest'])
+                    target = "Truck" if target is None else str(target)
+                    dest = "Truck" if dest is None else str(dest)
                     cost = step_data['cost']
 
                     step_info_label.config(text=f"Step {current_step + 1} of {total_steps}")
@@ -227,7 +222,7 @@ def display_load(lines):
 
         else:
             messagebox.showerror("Validation Check",
-                                 "Please input at least 1 container, descriptions, and weights.")
+                                 "Please input at least 1 container or 1 description with weight.")
 
     # Define a function to validate the description
     def validate_description(description):
@@ -243,7 +238,7 @@ def display_load(lines):
             weight_value = int(weight)
             if 0 <= weight_value <= 99999:
                 return True
-        messagebox.showerror("Validation Check", "Invalid weight.")
+        messagebox.showerror("Validation Check", "Invalid weight. Enter a non-negative number")
         return False
 
     # Create Entry fields for Description and Weight
@@ -261,7 +256,7 @@ def display_load(lines):
     add_info_button = tk.Button(the_load_window, text="Add Description & Weight", command=add_description_and_weight)
     add_info_button.pack(pady=5)
 
-    send_info_button = tk.Button(the_load_window, text="Start", height=3, width=10,
+    send_info_button = tk.Button(the_load_window, text="Start", height=2, width=10,
                                  command=send_info_to_onload_offload_algorithm)
     send_info_button.pack(pady=5)
 
@@ -499,7 +494,6 @@ def display_balance(lines):
             buttons_dict[(adjusted_i, adjusted_j)] = btn
 
     def update_grid(start_coords, dest_coords):
-        # Reset the previous Start and Dest colors if needed
         for coords, btn in buttons_dict.items():
             if btn.cget('bg') in ['red', 'purple']:
                 btn.config(bg='light green' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace', text="")
