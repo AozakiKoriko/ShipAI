@@ -16,6 +16,37 @@ cargos_weight = []
 file_path = ""
 
 
+def save_progress(current_step, json_data, progress_file_path='progress.json'):
+    progress = {
+        'last_step': current_step,
+        'data': json_data
+    }
+    with open(progress_file_path, 'w') as file:
+        json.dump(progress, file)
+
+
+def load_progress(progress_file_path='progress.json'):
+    try:
+        with open(progress_file_path, 'r') as file:
+            progress = json.load(file)
+            return progress['last_step'], progress['data']
+    except FileNotFoundError:
+        messagebox.showinfo("Error reading", "Progress file not found")
+        return None, None
+
+
+def on_load_progress_click(update_step_display):
+    global current_step, json_data
+
+    last_step, saved_data = load_progress()
+    if last_step is not None and saved_data is not None:
+        current_step = last_step - 1
+        json_data = saved_data
+        update_step_display()
+    else:
+        messagebox.showinfo("Load Progress", "No saved progress found or unable to read the file.")
+
+
 # Function to read and parse JSON data
 def read_json_data():
     try:
@@ -132,6 +163,7 @@ def display_load(lines):
 
             target_list.append(coords)
 
+
         elif current_color == 'light blue':
             btn.config(bg='light green')
 
@@ -210,6 +242,9 @@ def display_load(lines):
                     step_details_label.pack_forget()
                     total_time_label.pack_forget()
                     next_button.pack_forget()
+                    send_manifest = tk.Label(left_frame,
+                                             text=f"Updated manifest \n has been generated", font=("Arial", 16))
+                    send_manifest.pack(pady=5)
                     back_button.pack(side=tk.TOP, pady=5)
                     os.remove('output.json')
 
@@ -224,6 +259,7 @@ def display_load(lines):
             next_button = tk.Button(left_frame, text="Next", command=update_step_display)
             next_button.pack(pady=5)
             return True
+
 
         else:
             messagebox.showerror("Validation Check",
@@ -375,6 +411,7 @@ def balance_window():
                 file_name = os.path.basename(file_path)  # Extracting only the file name
                 save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
 
+
         else:
             messagebox.showwarning("Balance", "Already Balanced")
 
@@ -387,6 +424,10 @@ def display_balance(lines):
     main_frame = tk.Frame(the_balance_window)
     main_frame.pack(side=tk.RIGHT, padx=50, pady=50)
     root.withdraw()  # close balance window
+
+    load_progress_button = tk.Button(the_balance_window, text="Load Progress",
+                                     command=lambda: on_load_progress_click(update_step_display))
+    load_progress_button.pack(pady=5)
 
     # Frame for the content display area on the left
     left_frame = tk.Frame(the_balance_window)
@@ -423,6 +464,7 @@ def display_balance(lines):
     def update_step_display():
         global current_step
         total_steps = len(json_data["steps"])
+        save_progress(current_step, json_data)
 
         if current_step < total_steps:
             current_step += 1
@@ -431,6 +473,9 @@ def display_balance(lines):
             step_details_label.pack_forget()
             total_time_label.pack_forget()
             next_button.pack_forget()
+            send_manifest = tk.Label(left_frame,
+                                     text=f"Updated manifest \n has been generated", font=("Arial", 16))
+            send_manifest.pack(pady=5)
             back_button.pack(side=tk.TOP, pady=5)
             os.remove('output.json')
 
@@ -538,6 +583,7 @@ def display_balance(lines):
     buffer_grid_frame.pack()
 
     def on_closing():
+        save_progress(current_step, json_data)
         the_balance_window.destroy()
         root.deiconify()
 
