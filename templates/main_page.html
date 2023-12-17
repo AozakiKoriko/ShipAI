@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ShipAI</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">ShipAI</div>
+
+        <input type="file" id="onload-offload-file" class="file-input" onchange="uploadFile('onload-offload')">
+        <button class="button" onclick="document.getElementById('onload-offload-file').click()">Onload/Offload</button>
+        
+        <input type="file" id="balance-file" class="file-input" onchange="uploadFile('balance')">
+        <button class="button" onclick="document.getElementById('balance-file').click()">Balance</button>
+    </div>
+
+    <script>
+        function uploadFile(action) {
+            var fileInput = document.getElementById('onload-offload-file');
+            var file = fileInput.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/' + action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/offload-page'; // 页面跳转
+                } else {
+                    throw new Error('Upload failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

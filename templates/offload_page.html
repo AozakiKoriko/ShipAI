@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Page Title</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            grid-gap: 10px;
+        }
+
+        .grid-item {
+            border: 1px solid black;
+            padding: 20px;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        #nextButton {
+            display: block;
+            width: 150px;
+            height: 50px;
+            margin: 20px auto;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container" id="gridContainer">
+    </div>
+    <div class="instructions">
+        please select offload containers, and click next when you ready
+    </div>
+    <button id="nextButton">Next</button>
+    <script>
+        let target_list = []; 
+        function submitTargetList() {
+        const formattedTargetList = target_list.map(item => [item.row, item.col]);
+        fetch('/submit-target-list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ targetList: formattedTargetList })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            window.location.href = '/onload-page';
+        })
+        .catch(error => console.error('Error:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', async (event) => {
+            const gridContainer = document.getElementById('gridContainer');
+            let grid;
+    
+            try {
+                const response = await fetch('/get-grid');
+                if (!response.ok) {
+                    throw new Error('Http error!');
+                }
+                grid = await response.json();
+    
+                for (let row = 7; row >= 0; row--) {
+                    for (let col = 0; col < 12; col++) {
+                        const gridItem = document.createElement('div');
+                        gridItem.classList.add('grid-item');
+                        if(grid[row][col] == '-1'){
+                            gridItem.style.backgroundColor = '#a0a0a0';
+                        }
+                        else if(grid[row][col] == '0'){
+
+                        }
+                        else{
+                            gridItem.textContent = grid[row][col];
+                        gridItem.dataset.selected = 'false';
+                            gridItem.addEventListener('click', () => {
+                            if (gridItem.textContent !== '0' && gridItem.textContent !== '-1') {
+                                if (gridItem.dataset.selected === 'false') {
+                                    gridItem.style.backgroundColor = 'green';
+                                    gridItem.dataset.selected = 'true';
+                                    target_list.push({ row: row, col: col});  
+                                } else {
+                                    gridItem.style.backgroundColor = '';  
+                                    gridItem.dataset.selected = 'false';
+                                    target_list = target_list.filter(item => item.row !== (7 - row) || item.col !== col);
+                                }
+                            }
+                        });
+                        }
+                        gridContainer.appendChild(gridItem);
+                    }
+                }
+            } catch (e) {console.error('Could not load grid: ', e);}
+        });
+
+        document.getElementById('nextButton').addEventListener('click', submitTargetList);
+    </script>    
+</body>
+</html>
