@@ -134,7 +134,7 @@
 
         function isValidName(name) {
             const trimmedName = name.trim();
-            const forbiddenPatterns = [/^NAN$/, /^UNUSED$/, /.*NAN.*$/, /.*UNUSED.*$/];
+            const forbiddenPatterns = [/^NAN$/, /^UNUSED$/];
 
             if (trimmedName === '' || forbiddenPatterns.some(pattern => pattern.test(trimmedName))) {
                 return false;

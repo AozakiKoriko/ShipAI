@@ -15,6 +15,23 @@
             padding: 20px;
             text-align: center;
             background-color: #f0f0f0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            background-color: lightyellow;
+            border: 1px solid black;
+            padding: 5px;
+            z-index: 100; /* 确保它显示在其他元素之上 */
+        }
+
+        .grid-item:hover .tooltip {
+            display: block;
         }
 
         .instructions {
@@ -162,7 +179,11 @@
                         }
                         else{
                             gridItem.textContent = grid[row][col];
-                        gridItem.dataset.selected = 'false';
+                            const tooltip = document.createElement('div');
+                            tooltip.classList.add('tooltip');
+                            tooltip.textContent = grid[row][col]; // 设置完整的文本内容
+                            gridItem.appendChild(tooltip);
+                            gridItem.dataset.selected = 'false';
                             gridItem.addEventListener('click', () => {
                             if (gridItem.textContent !== '0' && gridItem.textContent !== '-1') {
                                 if (gridItem.dataset.selected === 'false') {

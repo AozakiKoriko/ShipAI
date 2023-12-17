@@ -125,3 +125,60 @@ December 17 2023: 12:26 ShipCase4.txt is opened, there are 7 containers on the s
 December 17 2023: 12:27 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
 December 17 2023: 12:27 ShipCase5.txt is opened, there are 5 containers on the ship
 December 17 2023: 12:27 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 13:47 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 13:51 ShipCase4.txt is opened, there are 7 containers on the ship
+December 17 2023: 13:51 Finished a Cycle. Manifest ShipCase4.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 13:51 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 13:52 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 13:55 ShipCase4.txt is opened, there are 7 containers on the ship
+December 17 2023: 13:56 Finished a Cycle. Manifest ShipCase4.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 13:56 ShipCase4.txt is opened, there are 7 containers on the ship
+December 17 2023: 13:56 Finished a Cycle. Manifest ShipCase4.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 13:56 ShipCase4.txt is opened, there are 7 containers on the ship
+December 17 2023: 13:57 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 13:57 Finished a Cycle. Manifest ShipCase4.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 13:57 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:00 ShipCase4.txt is opened, there are 7 containers on the ship
+December 17 2023: 14:00 Finished a Cycle. Manifest ShipCase4.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 14:10 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:12 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:13 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:14 "fdasf"
+December 17 2023: 14:14 fdafdas signs in
+December 17 2023: 14:14 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 14:25 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:31 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:31 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:35 ShipCase3.txt is opened, there are 6 containers on the ship
+December 17 2023: 14:35 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:35 ShipCase5.txt is opened, there are 5 containers on the ship
+December 17 2023: 14:35 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:39 ShipCase2.txt is opened, there are 4 containers on the ship
+December 17 2023: 14:39 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:41 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:41 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:41 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:41 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:55 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:55 ShipCase1_copy.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:56 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 14:56 "jkldajslkfdjaslf"
+December 17 2023: 14:56 ddddd signs in
+December 17 2023: 14:56 Finished a Cycle. Manifest ShipCase1_copy.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 14:57      signs in
+December 17 2023: 15:01 ShipCase2.txt is opened, there are 4 containers on the ship
+December 17 2023: 15:02 Finished a Cycle. Manifest ShipCase2.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 15:03 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 15:17 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 15:25 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 15:26 ShipCase2.txt is opened, there are 4 containers on the ship
+December 17 2023: 15:27 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 15:28 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 15:30 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 15:31 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 15:31 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 15:31 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 15:32 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 15:32 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed
+December 17 2023: 15:32 ShipCase1.txt is opened, there are 2 containers on the ship
+December 17 2023: 15:32 Finished a Cycle. Manifest ShipCase1.txt was updated, and a reminder pop-up to operator to send file was displayed

@@ -935,9 +935,9 @@ def run(doc_path):
         for index, step in enumerate(steps_data):
             step_json = {
                 "No": index + 1,
-                "target": [int(step[0][0][0]), int(step[0][0][1])],
+                "target": [int(step[0][0][0]-1), int(step[0][0][1]-1)],
                 "targetLoc": step[0][1],
-                "dest": [int(step[1][0][0]), int(step[1][0][1])],
+                "dest": [int(step[1][0][0]-1), int(step[1][0][1]-1)],
                 "destLoc": step[1][1],
                 "cost": step[2],
                 "array": step[3]
