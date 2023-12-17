@@ -1,0 +1,17 @@
+{
+    "steps": [
+        {
+            "No": 1,
+            "target": [
+                0,
+                2
+            ],
+            "targetLoc": "ship",
+            "dest": null,
+            "destLoc": "truck",
+            "cost": 22
+        }
+    ],
+    "currentSteps": null,
+    "totalTime": 22
+}

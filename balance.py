@@ -8,6 +8,17 @@ import heapq
 import copy
 import json
 
+import os
+from flask import Flask
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'sdssds5057')
+
+# setting upload path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 class Container:
     def __init__(self, name: str, weight: float):
@@ -924,9 +935,10 @@ def run(doc_path):
         for index, step in enumerate(steps_data):
             step_json = {
                 "No": index + 1,
-                "target": [int(step[0][0][0]), int(step[0][0][1])],
+
+                "target": [int(step[0][0][0]-1), int(step[0][0][1]-1)],
                 "targetLoc": step[0][1],
-                "dest": [int(step[1][0][0]), int(step[1][0][1])],
+                "dest": [int(step[1][0][0]-1), int(step[1][0][1]-1)],
                 "destLoc": step[1][1],
                 "cost": step[2],
                 "array": step[3]
@@ -942,9 +954,10 @@ def run(doc_path):
         if N.get_gn() == 0:
             return False
 
-        json_output = json.dumps(final_json_structure, indent=4)
-        with open('output_balance.json', 'w') as file:
-            file.write(json_output)
+
+        output_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output.json')
+        with open(output_file_path, 'w') as file:
+            json.dump(final_json_structure, file, indent=4)
 
         new_file_path = file_path[:-4] + "_Updated" + ".txt"
         generate_manifest(new_file_path, N.slot_matrix)
@@ -954,4 +967,6 @@ def run(doc_path):
         return True
     else:
         return False
+
+
 
