@@ -45,8 +45,8 @@ def path_to_json(path, total_cost):
 def write_cargo_info_to_file(cargos, file_path):
     with open(file_path, 'w') as file:
         for cargo in cargos:
-            position = f"({cargo.position[0]+1},{cargo.position[1]+1})"
-            weight = f"{{{cargo.weight}}}"
+            position = f"[{cargo.position[0]+1:02},{cargo.position[1]+1:02}]"
+            weight = f"{{{cargo.weight:05}}}"
             name = cargo.name
             line = f"{position}, {weight}, {name}\n"
             file.write(line)
