@@ -3,16 +3,38 @@
         {
             "No": 1,
             "target": [
-                2,
-                0
+                0,
+                1
             ],
             "targetLoc": "ship",
             "dest": null,
             "destLoc": "truck",
-            "cost": 14
+            "cost": 20
         },
         {
             "No": 2,
+            "target": null,
+            "targetLoc": "truck",
+            "dest": [
+                1,
+                0
+            ],
+            "destLoc": "ship",
+            "cost": 9
+        },
+        {
+            "No": 3,
+            "target": [
+                0,
+                2
+            ],
+            "targetLoc": "ship",
+            "dest": null,
+            "destLoc": "truck",
+            "cost": 31
+        },
+        {
+            "No": 4,
             "target": null,
             "targetLoc": "truck",
             "dest": [
@@ -21,19 +43,8 @@
             ],
             "destLoc": "ship",
             "cost": 8
-        },
-        {
-            "No": 3,
-            "target": null,
-            "targetLoc": "truck",
-            "dest": [
-                3,
-                0
-            ],
-            "destLoc": "ship",
-            "cost": 15
         }
     ],
     "currentSteps": null,
-    "totalTime": 37
+    "totalTime": 68
 }
