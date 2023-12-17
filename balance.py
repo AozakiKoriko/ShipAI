@@ -935,6 +935,7 @@ def run(doc_path):
         for index, step in enumerate(steps_data):
             step_json = {
                 "No": index + 1,
+
                 "target": [int(step[0][0][0]-1), int(step[0][0][1]-1)],
                 "targetLoc": step[0][1],
                 "dest": [int(step[1][0][0]-1), int(step[1][0][1]-1)],
@@ -953,6 +954,7 @@ def run(doc_path):
         if N.get_gn() == 0:
             return False
 
+
         output_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output.json')
         with open(output_file_path, 'w') as file:
             json.dump(final_json_structure, file, indent=4)
@@ -966,4 +968,5 @@ def run(doc_path):
     else:
         return False
 
-run("/Users/hanlinzha/Library/CloudStorage/OneDrive-Personal/CS 179M/ShipAI/ship_cases/ShipCase2.txt")
+
+
