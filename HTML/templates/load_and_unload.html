@@ -136,57 +136,6 @@
         selected: [], // To store selected containers
         loaded: [],   // To store loaded containers
       };
-
-      let selectedContainers = []; 
-      let loadedContainers = [];   
-      document.getElementById('saveButton').addEventListener('click', function() {
-        // Construct the payload
-        const payload = {
-            selectedContainers: selectedContainers,
-            loadedContainers: loadedContainers
-        };
-    
-        // Make the AJAX request to send data to the Flask server
-        fetch('/save-containers', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            // Additional code to handle successful response
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    });
-      function selectContainer(name, weight, row, column) {
-          selectedContainers.push({ name, weight, row, column });
-      }
-
-      // Example function to add a container to loadedContainers
-      function loadContainer(name, weight, location) {
-          loadedContainers.push({ name, weight, location });
-      }
-
-      // Function to send data to the server
-      function saveContainersData() {
-          const data = { selectedContainers, loadedContainers };
-          fetch('/save-containers', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(data)
-          })
-          .then(response => response.json())
-          .then(data => console.log('Data saved:', data))
-          .catch(error => console.error('Error:', error));
-      }
-
     
       function handleGridCellClick(event) {
         if (isAddButtonClicked) { // Check if the Add button was clicked
@@ -280,7 +229,8 @@
 
       startButton.addEventListener('click', () => {
         // Hide load container information section
-        document.getElementById('load-container-info').style.display = 'none';
+        loadContainerInfo.style.display = 'none';
+
         // Show step information section
         stepInfo.style.display = 'block';
 
@@ -300,13 +250,9 @@
 
       // Function to update the UI with the step information
       function updateStepInfo(data) {
-        document.getElementById('currentStep').textContent = data.currentStep;
-        document.getElementById('totalSteps').textContent = data.totalSteps;
-        document.getElementById('totalTime').textContent = data.totalTime;
-        document.getElementById('containerInfo').textContent = data.containerName;
-        document.getElementById('timeEstimation').textContent = data.timeEstimation;
-        document.getElementById('moveFrom').textContent = `[${data.moveFrom.row}, ${data.moveFrom.column}]`;
-        document.getElementById('moveTo').textContent = `[${data.moveTo.row}, ${data.moveTo.column}]`;      }
+        // Update the UI elements with the data
+        // ... code to update elements ...
+      }
 
       // Next step button event listener
       document.getElementById('nextStepButton').addEventListener('click', () => {
@@ -377,70 +323,7 @@
         });
       });
     });
-    // Function to start blinking the specified elements
-    function startBlinking(startElementId, destElementId) {
-      const startElement = document.getElementById(startElementId);
-      const destElement = document.getElementById(destElementId);
-
-      if (startElement) {
-          startElement.classList.add('blinking');
-      }
-
-      if (destElement && destElementId !== startElementId) {
-          destElement.classList.add('blinking');
-      }
-  }
-
-  // Function to stop blinking all elements
-  function stopBlinking() {
-      const blinkingElements = document.querySelectorAll('.blinking');
-      blinkingElements.forEach(element => {
-          element.classList.remove('blinking');
-      });
-  }
-
-  // Update the step information and start blinking
-  function updateStepInfo(data) {
-      document.getElementById('currentStep').textContent = data.No;
-      document.getElementById('totalSteps').textContent = data.totalSteps;
-      document.getElementById('totalTime').textContent = data.totalTime;
-      document.getElementById('containerInfo').textContent = data.containerName;
-      document.getElementById('timeEstimation').textContent = data.timeEstimation;
-      document.getElementById('moveFrom').textContent = `[${data.moveFrom.row}, ${data.moveFrom.column}]`;
-      document.getElementById('moveTo').textContent = `[${data.moveTo.row}, ${data.moveTo.column}]`;
-
-      // Calculate the IDs for the start and destination elements
-      const startElementId = getElementId(data.moveFrom.row, data.moveFrom.column);
-      const destElementId = getElementId(data.moveTo.row, data.moveTo.column);
-
-      // Start blinking the start and destination elements
-      startBlinking(startElementId, destElementId);
-  }
-
-  // Helper function to get the element ID based on row and column
-  function getElementId(row, column) {
-      if (row === null || column === null) {
-          return 'truck-grid'; // Assuming 'truck-grid' is the ID for the truck area
-      }
-      return `grid-cell-${row}-${column}`; // Modify as per your actual ID structure
-  }
-
-  // When moving to the next step, stop the current blinking
-  document.getElementById('nextStepButton').addEventListener('click', () => {
-      stopBlinking(); // Stop current blinking
-      fetchNextStep(); // Fetch the next step information
-  });
-
-  // Fetch the first step information (if applicable)
-  function fetchNextStep() {
-      fetch('/get_next_step')
-          .then(response => response.json())
-          .then(data => {
-              updateStepInfo(data); // Update the UI with the step information
-          })
-          .catch(error => console.error('Error:', error));
-  }
-
+    
   </script>
 </body>
 </html>

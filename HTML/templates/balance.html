@@ -27,9 +27,9 @@
       <button>Next</button>
       </div>
       <div class="message-box">
-        <input type="text" id="message" placeholder="Edit message...">
+        <input type="text" id="user-message" placeholder="Edit message...">
         <button id="send">Send</button>
-    </div>
+      </div>
     <div class="truck-area">
       <label for="truck">Truck</label>
       <div class="truck-grid">
@@ -54,9 +54,8 @@
  </div>
 <script>
 document.getElementById('loginForm').addEventListener('submit', function(event) {
-  event.preventDefault(); // Prevents the default form submission
+  event.preventDefault();
   const username = document.getElementById('username').value;
-  // Handle the username (e.g., send it to a server or validate it)
   console.log('Username submitted:', username);
 });
   
@@ -108,12 +107,51 @@ document.getElementById('send').addEventListener('click', function() {
 
 <script>
 document.addEventListener('DOMContentLoaded', (event) => {
-  document.querySelectorAll('.btn').forEach(button => {
-    button.addEventListener('click', () => {
-      button.classList.toggle('clicked');
+  document.getElementById('loginForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const username = document.getElementById('username').value;
+
+    fetch('/newLogin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username: username })
+    })
+      .then(response => response.json())
+      .then(data => {
+        alert('Username logged successfully.');
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  });
+
+  document.getElementById('send').addEventListener('click', function() {
+    var message = document.getElementById('user-message').value;
+    var username = "{{ username }}"; // Make sure this is correctly populated
+
+    fetch('/log_message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username: username, message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        alert('Message logged successfully');
+      } else {
+        alert('Error logging message');
+      }
+      document.getElementById('user-message').value = ''; 
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('Error sending message');
     });
   });
-});
 
 document.querySelectorAll('.grid-cell, .buffer-cell, .truck-cell').forEach(button => {
   button.addEventListener('click', () => {
@@ -121,12 +159,12 @@ document.querySelectorAll('.grid-cell, .buffer-cell, .truck-cell').forEach(butto
   });
 });
 
-document.getElementById('stop-blinking').addEventListener('click', () => {
-  document.querySelectorAll('.grid-cell.blinking, .buffer-cell.blinking, .truck-cell.blinking').forEach(button => {
-    button.classList.remove('blinking');
+  document.getElementById('stop-blinking').addEventListener('click', () => {
+    document.querySelectorAll('.grid-cell.blinking, .buffer-cell.blinking, .truck-cell.blinking').forEach(button => {
+      button.classList.remove('blinking');
+    });
   });
 });
-
 </script>
 </body>
 </html>
