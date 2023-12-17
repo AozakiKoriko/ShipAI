@@ -6,6 +6,7 @@ from grid_creator import fill_grid_with_cargos
 from onload_offload_main import onload_offload_algorithm
 import json
 from datetime import datetime
+from balance import run
 
 
 app = Flask(__name__)
@@ -79,6 +80,7 @@ def submit_onload_list():
     onload_offload_algorithm(filepath, target_list, onload_list, weight_list) 
     return jsonify({"status": "success"})
 
+
 @app.route('/get-steps')
 def get_steps():
     try:
@@ -145,6 +147,9 @@ def balance():
 
         cargos = parse_cargo_info(filepath)
         grid = fill_grid_with_cargos(cargos)
+        session['grid'] = grid
+        run(filepath)
+        return redirect(url_for('step_page'))
 
 
 if __name__ == '__main__':

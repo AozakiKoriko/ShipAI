@@ -152,6 +152,21 @@
         let stepsData = null;
         let totalRemainingTime = 0;
 
+        function saveCurrentStep(index) {
+            localStorage.setItem('currentStepIndex', index);
+        }
+
+        // 从 localStorage 加载保存的步骤
+        function loadCurrentStep() {
+            const savedIndex = localStorage.getItem('currentStepIndex');
+            return savedIndex ? parseInt(savedIndex, 10) : 0;
+        }
+
+        // 清除 localStorage 中的数据
+        function clearSavedSteps() {
+            localStorage.removeItem('currentStepIndex');
+        }
+
         async function fetchSteps() {
             try {
                 const response = await fetch('/get-steps');
@@ -160,6 +175,7 @@
                 }
                 stepsData = await response.json();
                 totalRemainingTime = stepsData.totalTime;
+                currentStepIndex = loadCurrentStep();
                 updateInstructionText(currentStepIndex);
             } catch (error) {
                 console.error('Error:', error);
@@ -235,10 +251,12 @@
 
         document.getElementById('nextButton').addEventListener('click', function() {
             currentStepIndex++;
+            saveCurrentStep(currentStepIndex);
             updateInstructionText(currentStepIndex);
         });
         document.getElementById('completeButton').addEventListener('click', function() {
         if (confirm("Don't forget to send updated manifest to captain! Do you want to proceed?")) {
+            clearSavedSteps();
             fetch('/complete-action', {
                 method: 'POST',
                 // 其他所需的请求头或数据

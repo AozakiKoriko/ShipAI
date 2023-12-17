@@ -84,6 +84,12 @@
             width: 30%;
         }
 
+        #reloadButton {
+            position: fixed;
+            left: 10px;
+            bottom: 90px; /* 调整这个值以放置按钮 */
+        }
+
     </style>
 </head>
 <body>
@@ -121,6 +127,7 @@
             </div>
         </div>
 <!----------------------------------------------------------------------------->
+    <button id="reloadButton">Reload</button>
     </div>
 
     <script>
@@ -201,6 +208,10 @@
             });
         };
 //-----------------------------------------------------------------------------
+        document.getElementById("reloadButton").onclick = function() {
+            window.location.href = '/step-page'; // 将 'your-target-page' 替换为您的目标 URL
+        };
+
     </script>
 </body>
 </html>
