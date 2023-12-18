@@ -36,6 +36,3 @@ Our software utilizes a variety of algorithms (A*, Dijkstra, backtracking, etc.)
 
 ## Contributing
 Contributions to our project are welcome. Please submit pull requests or open issues for suggestions and improvements.
-
-## License
-[Specify the license here, if applicable]
