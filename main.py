@@ -391,7 +391,7 @@ class LoadResultPage(tk.Frame):
                 target = "[" + str(step_data['target'][0] + 1) + ", " + str(step_data['target'][1] + 1) + "]"
                 dest = "[" + str(step_data['dest'][0] + 1) + ", " + str(step_data['dest'][1] + 1) + "]"
                 self.step_label.config(
-                    text=f"Step {step_data['No']}: Move from {target} slot  {step_data['target']} to "
+                    text=f"Step {step_data['No']}: Move from {step_data['targetLoc']} slot  {target} to "
                          f"{step_data['destLoc']} slot {dest}")
                 dest_row = step_data['dest'][0]
                 dest_column = step_data['dest'][1]
