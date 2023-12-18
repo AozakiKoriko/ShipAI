@@ -4,6 +4,7 @@ import os
 from tkinter import filedialog, messagebox
 import json
 import balance
+import re
 from onload_offload_main import onload_offload_algorithm
 
 username = None
@@ -40,11 +41,11 @@ def on_load_progress_click(update_step_display):
 
     last_step, saved_data = load_progress()
     if last_step is not None and saved_data is not None:
-        current_step = last_step - 1
+        current_step = last_step
         json_data = saved_data
         update_step_display()
     else:
-        messagebox.showinfo("Load Progress", "No saved progress found or unable to read the file.")
+        messagebox.showinfo("Load Progress", "No saved progress found")
 
 
 # Function to read and parse JSON data
@@ -56,12 +57,11 @@ def read_json_data():
         messagebox.showerror("JSON Error", "JSON File Not Found")
 
 
-# Get the path to the desktop directory
 desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
 log_file_path = os.path.join(desktop_path, 'log.txt')
 
 
-# Function to save message to log file
+# log file
 def save_to_log(action):
     timestamp = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
     log_message = f"{timestamp} - {action}\n"
@@ -78,7 +78,6 @@ def back_to_main(current_window):
 def update_username():
     global username
 
-    # Function to handle updating the username
     def set_new_username():
         new_username = username_entry.get()
 
@@ -87,7 +86,6 @@ def update_username():
             popup_window.destroy()
             save_to_log(f"{username} signs in")
 
-    # Create a pop-up window for entering a new username
     popup_window = tk.Toplevel()
     popup_window.title("Hand Over")
     popup_window.geometry("300x150")
@@ -112,185 +110,180 @@ def load_window():
             with open(file_path, 'r') as file:
                 lines = file.readlines()
                 display_load(lines)
-                file_name = os.path.basename(file_path)  # Extracting only the file name
-                save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
+                file_name = os.path.basename(file_path)
+                save_to_log(f"Opened Manifest: {file_name}")
         except FileNotFoundError:
             messagebox.showerror("File error", "File Not Found")
 
 
 # Display load manifest
 def display_load(lines):
+    global current_step
     the_load_window = tk.Toplevel(root)
     the_load_window.title("Load/Offload")
     main_frame = tk.Frame(the_load_window)
     main_frame.pack(side=tk.RIGHT, padx=50, pady=50)
     root.withdraw()  # close main window
 
+    # load_progress_button = tk.Button(the_load_window, text="Rescan Step",
+    #                                  command=lambda: on_load_progress_click(update_step_display))
+    # load_progress_button.pack(pady=5)
+
     # Frame for the content display area on the left
     left_frame = tk.Frame(the_load_window)
     left_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
-    # Button to update the username
+    # update the username
     update_username_button = tk.Button(left_frame, text="Hand Over", command=update_username)
     update_username_button.pack(side=tk.TOP, pady=5)
 
-    # Button to go back to the main window
+    # back to the main window
     back_button = tk.Button(left_frame, text="Load Done", width=12, height=3,
                             command=lambda: back_to_main(the_load_window))
-    back_button.pack_forget()  # Hide the button initially
+    back_button.pack_forget()
 
     cell_info_label = tk.Label(left_frame, text="", font=("Arial", 16))
-    cell_info_label.pack()  # Adjust the positioning as needed within your layout
+    cell_info_label.pack()
 
-    # Function to update content display
+    # update content display
     def update_content_display(content):
-        # Update the label with the clicked cell content
         cell_info_label.config(text=f"Container Name is: {content}")
         log_offload = f"Container of {content} offload"
         save_to_log(log_offload)
 
-    # Buttons for content display manipulation
     clear_button = tk.Button(left_frame, text="Clear", command=lambda: update_content_display(""))
     clear_button.pack(pady=5)
 
-    buttons_dict = {}  # Dictionary to keep track of buttons
+    buttons_dict = {}
 
-    # function to toggle cell color between light green and light blue
-    def change_cell_color(event, btn, coords):
+    def change_cell_color(event, btn, original_coords):
         current_color = btn.cget('bg')
         if current_color == 'light green':
             btn.config(bg='light blue')
 
-            target_list.append(coords)
-
+            send_new_coords = (original_coords[0] - 1, original_coords[1] - 1)
+            target_list.append(send_new_coords)
 
         elif current_color == 'light blue':
             btn.config(bg='light green')
 
-    # Function to add a description and weight
     def add_description_and_weight():
         description = description_entry.get().strip()
-        weight = weight_entry.get().strip()
+        weight_str = weight_entry.get().strip()
 
-        if validate_description(description) and validate_weight(weight):
-            # Append the description and weight to their respective lists
+        if validate_description(description) and validate_weight(weight_str):
+            weight = int(weight_str)
             onload_list.append(description)
             cargos_weight.append(weight)
 
-            # Clear the description and weight Entry fields
             description_entry.delete(0, tk.END)
             weight_entry.delete(0, tk.END)
 
             log_message = f"Container of description: {description}, weight: {weight} onload"
             save_to_log(log_message)
 
+    def step_display_function():
+        global current_step
+        json_data = read_json_data()
+
+        current_step = 0
+        step_info_label = tk.Label(left_frame, font=("Arial", 16))
+        step_info_label.pack(pady=5)
+        step_details_label = tk.Label(left_frame, font=("Arial", 18))
+        step_details_label.pack(pady=5)
+
+        def update_grid(display_target, display_dest):
+            for coords, btn in buttons_dict.items():
+                if btn.cget('bg') in ['red', 'blue']:
+                    btn.config(bg='SystemButtonFace' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace',
+                               text="")
+
+            if display_target:
+                target_coords = (display_target[0] + 1, display_target[1] + 1)
+                if target_coords in buttons_dict:
+                    buttons_dict[target_coords].config(bg='red')
+
+            if display_dest:
+                dest_coords = (display_dest[0] + 1, display_dest[1] + 1)
+                if dest_coords in buttons_dict:
+                    buttons_dict[dest_coords].config(bg='blue')
+
+        def update_step_display():
+            global current_step
+            total_steps = len(json_data["steps"])
+            save_progress(current_step, json_data)
+
+            if current_step < total_steps:
+                step_data = json_data['steps'][current_step]
+                target = step_data.get('target')
+                dest = step_data.get('dest')
+
+                display_target = [coord + 1 for coord in target] if target is not None else "Truck"
+                display_dest = [coord + 1 for coord in dest] if dest is not None else "Truck"
+
+                update_grid(target, dest)
+
+                cost = step_data['cost']
+
+                step_info_label.config(text=f"Step {current_step + 1} of {total_steps}")
+                step_details_label.config(
+                    text=f"Start: {display_target} -> Dest: {display_dest} \n Current Time: {cost}")
+
+                current_step += 1
+            else:
+                step_info_label.pack_forget()
+                step_details_label.pack_forget()
+                total_time_label.pack_forget()
+                next_button.pack_forget()
+                send_manifest = tk.Label(left_frame,
+                                         text=f"Updated manifest \n has been generated", font=("Arial", 16))
+                send_manifest.pack(pady=5)
+                back_button.pack(side=tk.TOP, pady=5)
+                os.remove('output.json')
+
+        update_step_display()
+
+        total_time = json_data["totalTime"]
+        total_time_label = tk.Label(left_frame, text=f"Total Time: {total_time}", font=("Arial", 14))
+        total_time_label.pack(pady=5)
+
+        next_button = tk.Button(left_frame, text="Next", command=update_step_display)
+        next_button.pack(pady=5)
+
     def send_info_to_onload_offload_algorithm():
         global file_path
         if len(target_list) >= 1 or len(onload_list) >= 1 and len(cargos_weight) >= 1:
             onload_offload_algorithm(file_path, target_list, onload_list, cargos_weight)
+            step_display_function()
 
-            json_data = read_json_data()
-            if json_data is None:
-                messagebox.showerror("Error", "Failed to load JSON data.")
-                return
-
-            # Initialize step-related variables and labels
-            current_step = 0
-            step_info_label = tk.Label(left_frame, font=("Arial", 16))
-            step_info_label.pack(pady=5)
-            step_details_label = tk.Label(left_frame, font=("Arial", 18))
-            step_details_label.pack(pady=5)
-
-            def update_grid(target, dest):
-                for coords, btn in buttons_dict.items():
-                    if btn.cget('bg') in ['red', 'purple']:
-                        btn.config(bg='SystemButtonFace' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace',
-                                   text="")
-
-                if target:
-                    target_coords = (target[0], target[1])
-                    if target_coords in buttons_dict:
-                        buttons_dict[target_coords].config(bg='red')
-
-                if dest:
-                    dest_coords = (dest[0], dest[1])
-                    if dest_coords in buttons_dict:
-                        buttons_dict[dest_coords].config(bg='purple')
-
-            # Function to update the step display
-            def update_step_display():
-                nonlocal current_step
-                total_steps = len(json_data["steps"])
-
-                if current_step < total_steps:
-                    step_data = json_data['steps'][current_step]
-                    target = step_data.get('target')
-                    dest = step_data.get('dest')
-
-                    update_grid(target, dest)
-
-                    target = "Truck" if target is None else str(target)
-                    dest = "Truck" if dest is None else str(dest)
-                    cost = step_data['cost']
-
-                    step_info_label.config(text=f"Step {current_step + 1} of {total_steps}")
-                    step_details_label.config(text=f"Start: {target} -> Dest: {dest} \n Current Time: {cost}")
-
-                    current_step += 1
-                else:
-                    step_info_label.pack_forget()
-                    step_details_label.pack_forget()
-                    total_time_label.pack_forget()
-                    next_button.pack_forget()
-                    send_manifest = tk.Label(left_frame,
-                                             text=f"Updated manifest \n has been generated", font=("Arial", 16))
-                    send_manifest.pack(pady=5)
-                    back_button.pack(side=tk.TOP, pady=5)
-                    os.remove('output.json')
-
-            update_step_display()
-
-            # Displaying total time
-            total_time = json_data["totalTime"]
-            total_time_label = tk.Label(left_frame, text=f"Total Time: {total_time}", font=("Arial", 14))
-            total_time_label.pack(pady=5)
-
-            # Next button to update the step display
-            next_button = tk.Button(left_frame, text="Next", command=update_step_display)
-            next_button.pack(pady=5)
             return True
-
 
         else:
             messagebox.showerror("Validation Check",
                                  "Please input at least 1 container or 1 description with weight.")
             return False
 
-    # Define a function to validate the description
     def validate_description(description):
-        disallowed_exact_words = ["NAN", "UNUSED"]
-        if description in disallowed_exact_words or not description:
+        pattern = r'\b(NAN|UNUSED)\b'
+        if re.search(pattern, description) or not description:
             messagebox.showerror("Validation Check", "Invalid description.")
             return False
         return True
 
-    # Define a function to validate the weight
-    def validate_weight(weight):
-        if weight.isdigit():
-            weight_value = int(weight)
+    def validate_weight(weight_str):
+        if weight_str.isdigit():
+            weight_value = int(weight_str)
             if 0 <= weight_value <= 99999:
                 return True
         messagebox.showerror("Validation Check", "Invalid weight. Enter a non-negative number")
         return False
 
     def on_button_click():
-        # Disable the button
         send_info_button.config(state=tk.DISABLED)
         success = send_info_to_onload_offload_algorithm()
         if not success:
             send_info_button.config(state=tk.NORMAL)
 
-    # Create Entry fields for Description and Weight
     description_label = tk.Label(the_load_window, text="Description:")
     description_label.pack(pady=5)
     description_entry = tk.Entry(the_load_window)
@@ -301,7 +294,6 @@ def display_load(lines):
     weight_entry = tk.Entry(the_load_window)
     weight_entry.pack(pady=5)
 
-    # Create buttons for adding Description and Weight, and sending all information
     add_info_button = tk.Button(the_load_window, text="Add Description & Weight", command=add_description_and_weight)
     add_info_button.pack(pady=5)
 
@@ -324,25 +316,21 @@ def display_load(lines):
     description_entry.bind("<Button-3>", disable_event)
     weight_entry.bind("<Button-3>", disable_event)
 
-    # Textbox for entering messages
     message_textbox = tk.Text(left_frame, height=4, width=40)
     message_textbox.pack()
 
-    # Function to clear the message textbox
     def clear_textbox():
         message_textbox.delete("1.0", tk.END)
 
-    # Function to handle submission of the message
     def submit_message():
         message = message_textbox.get("1.0", tk.END).strip()
         if message:
             save_to_log(message)
             messagebox.showinfo("Message Saved", "Message saved to log file")
-            clear_textbox()  # Clear the textbox after submitting the message
+            clear_textbox()
         else:
             messagebox.showwarning("Empty Message", "Please enter a message to submit")
 
-    # Button to submit the message
     submit_button = tk.Button(left_frame, text="Submit", command=submit_message)
     submit_button.pack(pady=5)
 
@@ -354,18 +342,16 @@ def display_load(lines):
     for line in lines:
         coords, _, label = line.strip().split(', ')
         x, y = map(int, coords.strip('[]').split(','))
-        grid_data[(x, y)] = label  # Extract the label
+        grid_data[(x, y)] = label
 
-    for i in range(8):  # 8 rows
-        for j in range(12):  # 12 columns
-            # Adjust coordinates to match the .txt file format
+    for i in range(8):
+        for j in range(12):
             adjusted_i = 8 - i
             adjusted_j = j + 1
 
             label_text = grid_data.get((adjusted_i, adjusted_j), "")
             coords = (adjusted_i, adjusted_j)
 
-            # Create buttons for each cell and attach a function to their click event
             if label_text == "NAN":
                 btn = tk.Button(frame, text="", borderwidth=1, relief="solid", width=8, height=2,
                                 bg="grey", state=tk.DISABLED)
@@ -377,15 +363,14 @@ def display_load(lines):
                                 bg="light green", command=lambda b=label_text: update_content_display(b))
                 btn.bind('<Button-1>', lambda event, button=btn, c=coords: change_cell_color(event, button, c))
             btn.grid(row=i, column=j)
-            buttons_dict[(adjusted_i, adjusted_j)] = btn  # Store buttons in dictionary
+            buttons_dict[(adjusted_i, adjusted_j)] = btn
 
-    # Create the 4x24 grid for buffer
+            # Create the 4x24 grid for buffer
     buffer_grid_frame = tk.Frame(main_frame)
     buffer_grid_frame.pack()
 
     for i in range(4):
         for j in range(24):
-            # Create buttons or widgets for the new grid and place them in buffer_grid_frame
             btn = tk.Button(buffer_grid_frame, borderwidth=2, text="", width=6, height=2, state=tk.DISABLED)
             btn.grid(row=i, column=j)
 
@@ -408,8 +393,8 @@ def balance_window():
             with open(file_path, 'r') as file:
                 lines = file.readlines()
                 display_balance(lines)
-                file_name = os.path.basename(file_path)  # Extracting only the file name
-                save_to_log(f"Opened Manifest: {file_name}")  # Logging only the file name
+                file_name = os.path.basename(file_path)
+                save_to_log(f"Opened Manifest: {file_name}")
 
 
         else:
@@ -423,35 +408,30 @@ def display_balance(lines):
     the_balance_window.title("Balance")
     main_frame = tk.Frame(the_balance_window)
     main_frame.pack(side=tk.RIGHT, padx=50, pady=50)
-    root.withdraw()  # close balance window
+    root.withdraw()
 
-    load_progress_button = tk.Button(the_balance_window, text="Load Progress",
+    load_progress_button = tk.Button(the_balance_window, text="Rescan Step",
                                      command=lambda: on_load_progress_click(update_step_display))
     load_progress_button.pack(pady=5)
 
-    # Frame for the content display area on the left
     left_frame = tk.Frame(the_balance_window)
     left_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
-    # Button to update the username
     update_username_button = tk.Button(left_frame, text="Hand over", command=update_username)
     update_username_button.pack(pady=5)
 
-    # Button to go back to the main window
     back_button = tk.Button(left_frame, text="Balance Done", width=12, height=3,
                             command=lambda: back_to_main(the_balance_window))
-    back_button.pack_forget()  # Hide the button initially
+    back_button.pack_forget()
 
     current_step = 1
     json_data = read_json_data()
 
-    # Initialize labels for displaying current step and details
     step_info_label = tk.Label(left_frame, font=("Arial", 16))
     step_info_label.pack(pady=5)
     step_details_label = tk.Label(left_frame, font=("Arial", 18))
     step_details_label.pack(pady=5)
 
-    # Set the labels with the first step's data
     first_step_data = json_data['steps'][0]
     first_start_coords = tuple(map(int, first_step_data['start']))
     first_dest_coords = tuple(map(int, first_step_data['dest']))
@@ -478,47 +458,42 @@ def display_balance(lines):
             send_manifest.pack(pady=5)
             back_button.pack(side=tk.TOP, pady=5)
             os.remove('output.json')
+            os.remove('progress.json')
 
         step_data = json_data['steps'][current_step - 1]
         start_coords = tuple(map(int, step_data['start']))
         dest_coords = tuple(map(int, step_data['dest']))
-        step_time = step_data['time']  # Extract time for the current step
+        step_time = step_data['time']
 
         update_grid(start_coords, dest_coords)
 
         step_info_label.config(text=f"Step {current_step} of {total_steps}")
         step_details_label.config(text=f"Start: {start_coords} -> Dest: {dest_coords} \n Current time: {step_time}")
 
-    # Displaying total time
     total_time = json_data["totalTime"]
     total_time_label = tk.Label(left_frame, text=f"Total Time: {total_time}", font=("Arial", 14))
     total_time_label.pack(pady=5)
 
-    # Next button to update the step display
     next_button = tk.Button(left_frame, text="Next", command=update_step_display)
     next_button.pack(pady=5)
 
-    buttons_dict = {}  # Dictionary to keep track of buttons
+    buttons_dict = {}
 
-    # Textbox for entering messages
     message_textbox = tk.Text(left_frame, height=4, width=55)
     message_textbox.pack(pady=10)
 
-    # Function to clear the message textbox
     def clear_textbox():
         message_textbox.delete("1.0", tk.END)
 
-    # Function to handle submission of the message
     def submit_message():
         message = message_textbox.get("1.0", tk.END).strip()
         if message:
             save_to_log(message)
             messagebox.showinfo("Message Saved", "Message saved to log file")
-            clear_textbox()  # Clear the textbox after submitting the message
+            clear_textbox()
         else:
             messagebox.showwarning("Empty Message", "Please enter a message to submit")
 
-    # Button to submit the message
     submit_button = tk.Button(left_frame, text="Submit", command=submit_message)
     submit_button.pack(pady=5)
 
@@ -533,38 +508,32 @@ def display_balance(lines):
         x, y = map(int, coords.strip('[]').split(','))
         grid_data[(x, y)] = label
 
-    # Generating the grid
-    for i in range(8):  # 8 rows
-        for j in range(12):  # 12 columns
-            # Adjust coordinates to match the .txt file format
+    for i in range(8):
+        for j in range(12):
             adjusted_i = 8 - i
             adjusted_j = j + 1
 
             label_text = grid_data.get((adjusted_i, adjusted_j), "")
 
-            # Creating buttons with labels from .txt file
             if label_text == "NAN":
                 btn = tk.Button(frame, text="", borderwidth=1, relief="solid", width=8, height=2,
                                 bg="grey", state=tk.DISABLED)
-            elif label_text == "UNUSED":
-                btn = tk.Button(frame, text="", borderwidth=1, relief="solid", width=8, height=2,
-                                state=tk.DISABLED)
+
             else:
-                btn = tk.Button(frame, text=label_text, borderwidth=1, relief="solid", width=8, height=2,
-                                bg="light green", state=tk.DISABLED)
+                btn = tk.Button(frame, text="", borderwidth=1, relief="solid", width=8, height=2,
+                                bg="SystemButtonFace", state=tk.DISABLED)
             btn.grid(row=i, column=j)
             buttons_dict[(adjusted_i, adjusted_j)] = btn
 
     def update_grid(start_coords, dest_coords):
         for coords, btn in buttons_dict.items():
-            if btn.cget('bg') in ['red', 'purple']:
-                btn.config(bg='light green' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace', text="")
+            if btn.cget('bg') in ['red', 'blue']:
+                btn.config(bg='SystemButtonFace' if btn.cget('state') != tk.DISABLED else 'SystemButtonFace', text="")
 
-        # Highlight only the Start and Dest in the grid
         if start_coords in buttons_dict:
             buttons_dict[start_coords].config(bg='red')
         if dest_coords in buttons_dict:
-            buttons_dict[dest_coords].config(bg='purple')
+            buttons_dict[dest_coords].config(bg='blue')
 
     start_coords = tuple(map(int, json_data['steps'][0]['start']))
     dest_coords = tuple(map(int, json_data['steps'][0]['dest']))
@@ -576,7 +545,6 @@ def display_balance(lines):
 
     for i in range(4):
         for j in range(24):
-            # Create buttons or widgets for the new grid and place them in buffer_grid_frame
             btn = tk.Button(buffer_grid_frame, borderwidth=2, text="", width=6, height=2, state=tk.DISABLED)
             btn.grid(row=i, column=j)
 
@@ -612,10 +580,10 @@ def login():
 # Check login credentials
 def check_login(user):
     global username
-    if user:  # Check if the username is not empty
+    if user:
         username = user
-        login_window.destroy()  # Close the login window
-        root.deiconify()  # Show the main window
+        login_window.destroy()
+        root.deiconify()
         save_to_log(f"{username} signs in")
     else:
         tk.messagebox.showerror("Error", "Please enter a username.")
